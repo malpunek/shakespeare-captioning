@@ -24,7 +24,7 @@ Overall the objective of this week is to get familiar with Show&Tell code, refre
     * [x] (Unit) Tests? Tox? setup.py?
     * [x] CLI, Click/python-fire?
     * [x] Code Style
-    * [ ] gitignore
+    * [x] gitignore
 - [ ] Make the code of Show&Tell runnable with recent PyTorch version
 - [ ] Train the network on MSCoco
 - [ ] Add GRU encoder

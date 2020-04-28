@@ -17,17 +17,38 @@ Overall the objective of this week is to get familiar with Show&Tell code, refre
 - [ ] Organise work:
     * [x] Basic README
     * [ ] Download MSCoco
-    * [ ] Decide on PyTorch version
+    * [x] Decide on PyTorch version
     * [ ] Get access to GPU for training
-    * [ ] Pipfile (vs requirements.txt) (+ Docker ?)
-    * [ ] How to include SemStyle code? git submodules vs fork vs shameless copy vs rewrite? What's their license?
-    * [ ] (Unit) Tests? Tox? setup.py?
-    * [ ] CLI, Click/python-fire?
-    * [ ] Code Style
+    * [x] Pipfile (vs requirements.txt) (+ Docker ?)
+    * [x] How to include ShowAttend&Tell code? git submodules vs fork vs shameless copy vs rewrite? What's their license?
+    * [x] (Unit) Tests? Tox? setup.py?
+    * [x] CLI, Click/python-fire?
+    * [x] Code Style
     * [ ] gitignore
 - [ ] Make the code of Show&Tell runnable with recent PyTorch version
 - [ ] Train the network on MSCoco
 - [ ] Add GRU encoder
+
+### Comments
+
+**ShowAttend&Tell code**: There are two problems
+
+* Their code doesn't have a license (I can't reuse it freely). I've already bumped the relevant [issue](https://github.com/sgrvinod/a-PyTorch-Tutorial-to-Image-Captioning/issues/81) on github. For now I will probably have to assume they will release the project under a permissive license.
+* How to use the code: FORK or rewrite. Rewrite would be better, fork is easier. For now fork seems a good idea, then maybe a rewrite once I understand all the nuances and focus on SemStyle
+
+**Pytorch version**: I don't see any valid reasons to go with something else than latest stable torch (that is 1.5)
+
+**Pipfile**: For now pipfile seems to be the most resonable solution. At some point it might be good to provide a dockerfile for easier deployment on different machines.
+
+**Tests**: Testing machine learning code is not trivial. That's because it's hard to reason about models behaviour. There aren't any established industry standart testing methods, but [this article](https://medium.com/@keeper6928/how-to-unit-test-machine-learning-code-57cf6fd81765) should serve as a good inspiration. I will use [pytest](https://docs.pytest.org/en/latest/) as my testing framework and will also try to implement something like [torchtest](https://github.com/suriyadeepan/torchtest) (the library is simple & they use GPL-3 license & I want to use MIT license)
+
+**Tox, setup.py**: I won't be writing a library so setup.py won't be needed. Tox is an overkill.
+
+**Code style**:  I'm going to be using black auto-formatter as I like their coincise style.
+
+**CLI**: I'm going with [Fire](https://github.com/google/python-fire)
+
+
 
 
 # References

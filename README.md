@@ -10,26 +10,44 @@ The network should be able to generate a caption along the lines of:
 
 # Backlog
 
-## 22 - 28.04
-
 Overall the objective of this week is to get familiar with Show&Tell code, refresh on PyTorch to become a true tensor-ninja and train a first captioning model
 
-- [ ] Organise work:
+- [x] Organise work:
     * [x] Basic README
-    * [ ] Download MSCoco
+    * [x] Download MSCoco
     * [x] Decide on PyTorch version
-    * [ ] Get access to GPU for training
+    * [x] Get access to GPU for training
     * [x] Pipfile (vs requirements.txt) (+ Docker ?)
     * [x] How to include ShowAttend&Tell code? git submodules vs fork vs shameless copy vs rewrite? What's their license?
     * [x] (Unit) Tests? Tox? setup.py?
     * [x] CLI, Click/python-fire?
     * [x] Code Style
     * [x] gitignore
-- [ ] Make the code of Show&Tell runnable with recent PyTorch version
-- [ ] Train the network on MSCoco
+- [x] Make the code of Show&Tell runnable with recent PyTorch version
+- [ ] - IN PROGRESS - Train the network on MSCoco
 - [ ] Add GRU encoder
 
-### Comments
+## Comments
+
+### 28.04 - 05.05
+
+Keypoints:
+
+- I've received access via ssh to a PC with a TITAN Xp GPU
+- I had quite a few admin-ish problems with it (details below). I've solved them, updated the code to run with a recent python version. 
+- One thing I noticed that striked me as odd (potentially a bug somewhere) is that using a larger batch-size resulted in lower memory usage as reported by `nvidia-smi`
+- The code was mostly pytorch 1.5 compliant
+- The network is set for 120 epochs which should take around 6 days, but it saves the best checkpoint after each epoch (and it's possible to resume training so I should have some sensible results in 1-2 days)
+
+
+
+**Admin trouble**: TLDR; the wrong version of nvidia drivers was installed and it caused weird behaviour.
+Long story:
+The installed nvidia drivers were outdated and didn't work with the cuda version pytorch 1.5 ships with. So I had to `sudo apt update && sudo apt upgrade` them. This actually broke the drivers entirely. I've spent a lot of time googling for a solution that didn't involve messing with blacklisting nouveau drivers - I knew that if the machine fails to reboot I will be stuck waiting for somebody to physically turn the PC on. Finally I've figured out that this wasn't the latest major release of these drivers and I purged everything nvidia related and installed nvidia-drivers-440 instead of nvidia-drivers-418; in accordance to what was reported by `ubuntu-drivers devices` and the nvidia website. 
+
+
+
+### 22 - 28.04
 
 **ShowAttend&Tell code**: There are two problems
 
@@ -47,8 +65,6 @@ Overall the objective of this week is to get familiar with Show&Tell code, refre
 **Code style**:  I'm going to be using black auto-formatter as I like their coincise style.
 
 **CLI**: I'm going with [Fire](https://github.com/google/python-fire)
-
-
 
 
 # References

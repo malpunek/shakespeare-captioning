@@ -10,8 +10,6 @@ The network should be able to generate a caption along the lines of:
 
 # Backlog
 
-Overall the objective of this week is to get familiar with Show&Tell code, refresh on PyTorch to become a true tensor-ninja and train a first captioning model
-
 - [x] Organise work:
     * [x] Basic README
     * [x] Download MSCoco
@@ -24,10 +22,33 @@ Overall the objective of this week is to get familiar with Show&Tell code, refre
     * [x] Code Style
     * [x] gitignore
 - [x] Make the code of Show&Tell runnable with recent PyTorch version
-- [ ] - IN PROGRESS - Train the network on MSCoco
-- [ ] Add GRU encoder
+- [x] Train the network on MSCoco
+- [ ] Evaluate the network on MSCoco and store results
+- [ ] Extract features from MSCoco images to hdf5 feature dataset
+    * [ ] Define the model
+    * [ ] Save the data
+- [ ] Train variation of *Term Generator* network from semstyle:
+    * [ ] Define the model
+    * [ ] Use fully connected + embedding as term extractor
+    * [ ] Transform captions to terms (as in the paper)
+      * [ ] Filtering non-semantic words
+      * [ ] Lemmatization and tagging
+      * [ ] Verb abstraction
+- [ ] Replace the fully connected layers with RNN
+
+
 
 ## Comments
+
+
+### 12.05 - 19.05
+
+
+
+### 05.05 - 12.05
+
+TODO
+
 
 ### 28.04 - 05.05
 

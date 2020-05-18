@@ -52,6 +52,9 @@ list available gpus
         hdf5_fname = Path(f"{save_base_path}.hdf5")
         hdf5_fname.unlink(missing_ok=True)
 
+        json_fname = f"{save_base_path}.json"
+        json_fname.unlink(missing_ok=True)
+
         model = FeatureExtractor()
         model.eval()
         model.to(self.device)
@@ -68,18 +71,18 @@ list available gpus
         dataset = CocoCaptions(root_path, annotations_path, transform=t)
 
         captions = []
-        with h5py.File(f"{save_base_path}.hdf5", "a") as f:
+        with h5py.File(hdf5_fname, "a") as f:
             feature_shape = (len(dataset), model.out_features)
             features = f.create_dataset("features", feature_shape, dtype="f")
 
-            for i, (img, caption) in enumerate(tqdm(islice(dataset, 10))):
-                img.unsqueeze(0)
-                img = img.to(self.device)
-                feats = model(img).cpu().numpy()
-                features[i] = feats[0]
-                captions.append(caption)
+            with torch.no_grad():
+                for i, (img, caption) in enumerate(tqdm(islice(dataset, 10))):
+                    img = img.unsqueeze(0).to(self.device)
+                    feats = model(img).cpu().numpy()
+                    features[i] = feats[0]
+                    captions.append(caption)
 
-        with open(f"{save_base_path}.json", "w") as f:
+        with open(json_fname, "w") as f:
             json.dump(captions, f)
 
 

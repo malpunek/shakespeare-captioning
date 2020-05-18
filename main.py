@@ -52,7 +52,7 @@ list available gpus
         hdf5_fname = Path(f"{save_base_path}.hdf5")
         hdf5_fname.unlink(missing_ok=True)
 
-        json_fname = f"{save_base_path}.json"
+        json_fname = Path(f"{save_base_path}.json")
         json_fname.unlink(missing_ok=True)
 
         model = FeatureExtractor()

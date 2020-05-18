@@ -76,7 +76,7 @@ list available gpus
             features = f.create_dataset("features", feature_shape, dtype="f")
 
             with torch.no_grad():
-                for i, (img, caption) in enumerate(tqdm(islice(dataset, 10))):
+                for i, (img, caption) in enumerate(tqdm(dataset)):
                     img = img.unsqueeze(0).to(self.device)
                     feats = model(img).cpu().numpy()
                     features[i] = feats[0]

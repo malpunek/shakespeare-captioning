@@ -27,6 +27,7 @@ The network should be able to generate a caption along the lines of:
 - [ ] Extract features from MSCoco images to hdf5 feature dataset
     * [ ] Define the model
     * [ ] Save the data
+- [ ] Encode the captions (Word Map)
 - [ ] Train variation of *Term Generator* network from semstyle:
     * [ ] Define the model
     * [ ] Use fully connected + embedding as term extractor
@@ -42,6 +43,14 @@ The network should be able to generate a caption along the lines of:
 
 
 ### 12.05 - 19.05
+
+Fire is cool for quick development, but is limited - no config file support, weird documentation.
+Migrate to click/milc at some point
+
+What do I need in the dataset?
+  * Features - h5py
+  * Split - h5py
+  * Captions - json
 
 
 

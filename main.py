@@ -70,19 +70,18 @@ list available gpus
         )
         dataset = CocoCaptions(root_path, annotations_path, transform=t)
 
-        captions = []
         with h5py.File(hdf5_fname, "a") as f:
             feature_shape = (len(dataset), model.out_features)
             features = f.create_dataset("features", feature_shape, dtype="f")
 
             with torch.no_grad():
-                for i, (img, caption) in enumerate(tqdm(dataset)):
+                for i, (img, _) in enumerate(tqdm(dataset, desc="Computing Features")):
                     img = img.unsqueeze(0).to(self.device)
                     feats = model(img).cpu().numpy()
                     features[i] = feats[0]
-                    captions.append(caption)
 
         with open(json_fname, "w") as f:
+            captions = [caps for _, caps in tqdm(dataset, desc="Extracting captions")]
             json.dump(captions, f)
 
 

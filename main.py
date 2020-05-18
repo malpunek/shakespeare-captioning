@@ -45,8 +45,8 @@ list available gpus
 
     def extract_features(
         self,
-        root_path: str = "data",
-        annotations_path: str = "data/annotations/captions_train2014.json",
+        root_path: str = "~/data",
+        annotations_path: str = "~/data/annotations/captions_train2014.json",
         save_base_path: str = "extracted_data",
     ):
         hdf5_fname = Path(f"{save_base_path}.hdf5")
@@ -68,7 +68,12 @@ list available gpus
                 ),
             ]
         )
-        dataset = CocoCaptions(root_path, annotations_path, transform=t)
+
+        dataset = CocoCaptions(
+            Path(root_path).expanduser(),
+            Path(annotations_path).expanduser(),
+            transform=t,
+        )
 
         with h5py.File(hdf5_fname, "a") as f:
             feature_shape = (len(dataset), model.out_features)

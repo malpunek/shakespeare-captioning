@@ -1,5 +1,6 @@
 import json
 from itertools import islice
+from pathlib import Path
 
 import fire
 import h5py
@@ -48,14 +49,21 @@ list available gpus
         annotations_path: str = "data/annotations/captions_train2014.json",
         save_base_path: str = "extracted_data",
     ):
+        hdf5_fname = Path(f"{save_base_path}.hdf5")
+        hdf5_fname.unlink(missing_ok=True)
+
         model = FeatureExtractor()
         model.eval()
         model.to(self.device)
 
         t = transforms.Compose(
-            transforms.Resize(256),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            [
+                transforms.Resize(256),
+                transforms.ToTensor(),
+                transforms.Normalize(
+                    mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
+                ),
+            ]
         )
         dataset = CocoCaptions(root_path, annotations_path, transform=t)
 
@@ -73,7 +81,6 @@ list available gpus
 
         with open(f"{save_base_path}.json", "w") as f:
             json.dump(captions, f)
-
 
 
 if __name__ == "__main__":

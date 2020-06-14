@@ -5,6 +5,7 @@ verify_ssl = true
 
 [dev-packages]
 flake8 = "*"
+isort = {extras = ["pipenv"], version = "*"}
 
 [packages]
 torch = "*"
@@ -15,6 +16,8 @@ fire = "*"
 tqdm = "*"
 h5py = "*"
 matplotlib = "*"
+spacy = "*"
+tabulate = "*"
 
 [requires]
 python_version = "3.8"

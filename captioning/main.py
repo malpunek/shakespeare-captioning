@@ -1,5 +1,6 @@
+from collections import Counter
 import json
-from itertools import islice
+from itertools import islice, chain
 from pathlib import Path
 
 import fire
@@ -88,6 +89,17 @@ list available gpus
         with open(json_fname, "w") as f:
             captions = [caps for _, caps in tqdm(dataset, desc="Extracting captions")]
             json.dump(captions, f)
+
+    def extract_word_map(self, *captions_files, save_path="word_map.json"):
+        captions = chain(
+            json.load(open(path, "r")) for path in captions_files
+        )  # [[c0_1, c0_2..], [c1_0, c1_1..]..]
+        captions = chain.from_iterable(captions)  # flat list
+        translation = str.maketrans("'", " ", ",.")
+        words = chain(c.translate(translation).split(" ") for c in captions])
+        words = map(str.lower, words)
+        
+
 
 
 if __name__ == "__main__":

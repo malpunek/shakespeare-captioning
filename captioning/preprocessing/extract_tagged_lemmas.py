@@ -2,7 +2,9 @@
 import json
 import logging
 from collections import Counter
+from typing import Iterable
 
+import contractions
 from tqdm.auto import tqdm
 
 from ..config import captions_path, load_nlp, words_path
@@ -36,8 +38,9 @@ POS_IN = [
 ]
 
 
-def caption_to_tagged_lemmas(caption: str):
+def caption_to_tagged_lemmas(caption: str) -> Iterable[str]:
     nlp = load_nlp()
+    caption = contractions.fix(caption)
     tokens = nlp(caption)
     # A. Filtering non-semantic words
     tokens = filter(lambda x: x.pos_ in POS_IN, tokens)

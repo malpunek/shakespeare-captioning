@@ -1,6 +1,6 @@
-from functools import lru_cache
+import glob
 import logging
-
+from functools import lru_cache
 
 # Paths
 mscoco_root_path = "/data/mscoco"
@@ -23,6 +23,15 @@ interactive = True
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 
 
+def get_zipped_plays_paths():
+    return list(
+        zip(
+            sorted(glob.glob(f"{plays_path}/*_modern.snt.aligned")),
+            sorted(glob.glob(f"{plays_path}/*_original.snt.aligned")),
+        )
+    )
+
+
 def setup_nltk():
     import nltk  # noqa: E402
 
@@ -34,6 +43,7 @@ def setup_nltk():
 def load_wn():
     setup_nltk()
     from nltk.corpus import wordnet
+
     return wordnet
 
 

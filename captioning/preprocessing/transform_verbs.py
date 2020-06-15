@@ -1,6 +1,7 @@
 # %%
 import json
 import logging
+from operator import itemgetter
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -44,7 +45,7 @@ def find_replacement(verb: str, verbs_to_keep: Dict[str, int]) -> Optional[str]:
     """
     wn = load_wn()
 
-    _score = lambda s: score(s, verbs_to_keep)
+    _score = lambda s: score(s, verbs_to_keep)  # noqa: E731
     scores = sorted(((_score(synset), synset) for synset in wn.synsets(verb, wn.VERB)))
     if not scores:
         return None
@@ -119,12 +120,12 @@ def main():
         f"There are {len(verbs_to_keep)} verbs to keep before sense generalization"
     )
 
-    additional_verbs = [
-        (verb, find_replacement(verb, verbs_to_keep))
+    additional_verbs = {
+        verb: find_replacement(verb, verbs_to_keep)
         for verb, cnt in tqdm(verbs.items(), desc="Getting additional verbs to keep")
         if cnt < threshold
-    ]
-    additional_verbs = dict(filter(lambda x: x[1] is not None, additional_verbs))
+    }
+    additional_verbs = dict(filter(itemgetter(1), additional_verbs.items()))
 
     log_stats(
         len(words_to_keep_T),

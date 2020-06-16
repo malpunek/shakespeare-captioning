@@ -1,8 +1,10 @@
-# TODO run all scripts interactively
-from .extend_verbs import main as main_3
-from .extract_tagged_lemmas import main as main_1
-from .transform_verbs import main as main_2
+from .extend_verbs import main as extend_verbs
+from .extract_tagged_lemmas import main as extract_lemmas
+from .transform_verbs import main as transform_verbs
+from .feature_extraction import main as extract_features
 
-main_1()
-main_2()
-main_3()
+extract_lemmas()
+transform_verbs()
+extend_verbs()
+
+extract_features()

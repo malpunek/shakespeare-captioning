@@ -15,7 +15,6 @@ features_path = f"{mscoco_root_path}/extracted_features.hdf5"
 feature_ids_path = f"{mscoco_root_path}/extracted_ids.npy"
 semantic_captions_path = f"{mscoco_root_path}/annotations/semantic_train2014.json"
 
-shakespeare_path = "/data/shake"
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"
 

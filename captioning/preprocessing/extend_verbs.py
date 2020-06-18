@@ -33,6 +33,7 @@ def main():
     with open(words_path) as f:
         words_count_T = json.load(f)
 
+    # TODO rerunning this causes KeyError cuz added verbs are not in words_count_T
     verbs_to_keep = {
         word[:-5]: words_count_T[word]
         for word in word_map_T.keys()

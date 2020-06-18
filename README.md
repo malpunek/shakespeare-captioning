@@ -97,6 +97,28 @@ The installed nvidia drivers were outdated and didn't work with the cuda version
 **CLI**: I'm going with [Fire](https://github.com/google/python-fire)
 
 
+## Lessons learned
+
+  - Imports, Importlib, project structure:
+    * Folders without `__init__.py` are namespaces not packages
+    * Use relative imports
+    * Run scripts using relative imports as `python -m`
+    * Use `__main__.py` to be able to run the whole package as script
+  - Logging
+    * More configurable than printing
+    * Gives the ability to naturally alter printing behaviour without altering codebase
+    * Doesn't play well with things like tqdm
+  - Fire (python-fire):
+    * Good for prototyping
+    * Bad for fine-grained control
+  - Pipenv
+    * Great idea, the future
+    * Tool is unstable, unreliable and causes pain
+  - Configuration
+    * Configuring machine-learning from the command line sucks. There are just to many options to pass each time.
+    * Config python file is better
+    * Perhaps something like [Hydra](https://hydra.cc/docs/next/intro/) is the option for future
+
 # References
 
 ## Primary

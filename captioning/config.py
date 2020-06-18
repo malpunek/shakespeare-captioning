@@ -6,6 +6,7 @@ import torch
 
 # Paths
 mscoco_root_path = "/data/mscoco"
+mscoco_imgs_path = f"{mscoco_root_path}/train2014"
 captions_path = f"{mscoco_root_path}/annotations/captions_train2014.json"
 
 computed_root_path = "/data/computed_shake"

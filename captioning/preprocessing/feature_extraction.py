@@ -1,13 +1,14 @@
 from pathlib import Path
 
 import h5py
+import numpy as np
 import torch
 from torchvision.datasets.coco import CocoCaptions
 from torchvision.transforms import transforms
 from tqdm.auto import tqdm
-import numpy as np
 
-from ..config import captions_path, device, features_path, mscoco_root_path, feature_ids_path
+from ..config import (captions_path, device, feature_ids_path, features_path,
+                      mscoco_imgs_path)
 from ..model import FeatureExtractor
 from ..utils import ask_overwrite
 
@@ -33,7 +34,7 @@ def main():
     )
 
     dataset = CocoCaptions(
-        Path(mscoco_root_path).expanduser(),
+        Path(mscoco_imgs_path).expanduser(),
         Path(captions_path).expanduser(),
         transform=t,
     )

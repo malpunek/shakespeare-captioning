@@ -88,7 +88,8 @@ def load_wn_nlp(model="en_core_web_lg"):
 def lgpu():
     """Lists the GPUs found by PyTorch"""
     if not torch.cuda.is_available():
-        logging.info("Torch didn't find any available GPUs.")
+        print("Torch didn't find any available GPUs.")
+        return
 
     n_gpu = torch.cuda.device_count()
     for i in range(n_gpu):
@@ -97,4 +98,34 @@ def lgpu():
             f"GPU {i}: Device: {torch.cuda.get_device_name(i)}, "
             f"Compute Capability: {high}.{low}"
         )
-        logging.info(message)
+    print(message)
+
+
+def pick_gpu():
+    global device, device_str
+
+    if not interactive:
+        device_str = "cpu" if not torch.cuda.is_available() else "cuda:0"
+
+    elif not torch.cuda.is_available():
+        device_str = "cpu"
+
+    elif torch.cuda.device_count() == 1:
+        device_str = "cuda:0"
+
+    else:
+        n_gpu = torch.cuda.device_count()
+        while True:
+            response = input("Type in the GPU index to use")
+            try:
+                x = int(response)
+                if not 0 <= x < n_gpu:
+                    raise ValueError
+            except ValueError:
+                print(f"Please supply an integer between {0} and {n_gpu - 1}")
+                continue
+        device_str = f"cuda:{x}"
+
+    device = torch.device(device_str)
+    logging.info(f"Using {device}")
+    return device

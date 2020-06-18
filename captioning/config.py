@@ -7,13 +7,14 @@ import torch
 # Paths
 mscoco_root_path = "/data/mscoco"
 captions_path = f"{mscoco_root_path}/annotations/captions_train2014.json"
-words_path = f"{mscoco_root_path}/words.json"
-word_map_path = f"{mscoco_root_path}/word_map.json"
-word_map_path = f"{mscoco_root_path}/big_word_map.json"
 
-features_path = f"{mscoco_root_path}/extracted_features.hdf5"
-feature_ids_path = f"{mscoco_root_path}/extracted_ids.npy"
-semantic_captions_path = f"{mscoco_root_path}/annotations/semantic_train2014.json"
+computed_root_path = "/data/computed_shake"
+words_path = f"{computed_root_path}/words.json"
+word_map_path = f"{computed_root_path}/word_map.json"
+
+features_path = f"{computed_root_path}/extracted_features.hdf5"
+feature_ids_path = f"{computed_root_path}/extracted_ids.npy"
+semantic_captions_path = f"{computed_root_path}/semantic_train2014.json"
 
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"

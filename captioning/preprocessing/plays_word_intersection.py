@@ -42,6 +42,7 @@ def main():
     ols = list(chain.from_iterable(ols))
 
     intersection = check_word_map_intersection(mls, word_map)
+    intersection = dict(sorted(intersection.items()))
 
     logging.info(
         (

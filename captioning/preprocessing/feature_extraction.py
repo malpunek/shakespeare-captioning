@@ -50,7 +50,7 @@ def main():
                 features[i] = feats[0]
 
     img_ids = np.array(dataset.ids)
-    with open(feature_ids_path) as f:
+    with open(feature_ids_path, "wb") as f:
         np.save(f, img_ids)
 
 

@@ -1,8 +1,14 @@
+import argparse
 import glob
 import logging
 from functools import lru_cache
 
 import torch
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--word_occurance_threshold", type=int, default=200)
+args = parser.parse_args()
+
 
 # Paths
 mscoco_root_path = "/data/mscoco"
@@ -21,7 +27,7 @@ plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"
 
 # Data processing metaparameters
-word_occurance_threshold = 200
+word_occurance_threshold = args.word_occurance_threshold
 
 gpu_num = 0
 device_str = "cpu" if not torch.cuda.is_available() else f"cuda:{gpu_num}"

@@ -24,10 +24,10 @@ The network should be able to generate a caption along the lines of:
 - [x] Make the code of Show&Tell runnable with recent PyTorch version
 - [x] Train the network on MSCoco
 - [ ] Evaluate the network on MSCoco and store results
-- [ ] Extract features from MSCoco images to hdf5 feature dataset
-    * [ ] Define the model
-    * [ ] Save the data
-- [ ] Encode the captions (Word Map)
+- [x] Extract features from MSCoco images to hdf5 feature dataset
+    * [x] Define the model
+    * [x] Save the data
+- [x] Encode the captions (Word Map)
 - [ ] Train variation of *Term Generator* network from semstyle:
     * [ ] Define the model
     * [ ] Use fully connected + embedding as term extractor
@@ -51,7 +51,6 @@ What do I need in the dataset?
   * Features - h5py
   * Split - h5py
   * Captions - json
-
 
 
 ### 05.05 - 12.05

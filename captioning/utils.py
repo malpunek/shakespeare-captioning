@@ -4,12 +4,12 @@ from pathlib import Path
 
 def ask_overwrite(path: str) -> bool:
     """
-
     Args:
         path (str): Path to file
 
     Returns:
-        bool: True if user wants to overwrite.
+        bool: True if user wants to overwrite or the program is not in the interactive
+          mode.
     """
     if interactive and Path(path).exists():
         while (

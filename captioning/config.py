@@ -1,30 +1,16 @@
 import argparse
 import glob
 import logging
+import os
 from functools import lru_cache
+from pathlib import Path
 
 import torch
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--word_occurance_threshold", type=int, default=200)
+parser.add_argument("-i", "--interactive", action="store_true")
 args = parser.parse_args()
-
-
-# Paths
-mscoco_root_path = "/data/mscoco"
-mscoco_imgs_path = f"{mscoco_root_path}/train2014"
-captions_path = f"{mscoco_root_path}/annotations/captions_train2014.json"
-
-computed_root_path = "/data/computed_shake"
-words_path = f"{computed_root_path}/words.json"
-word_map_path = f"{computed_root_path}/word_map.json"
-
-features_path = f"{computed_root_path}/extracted_features.hdf5"
-feature_ids_path = f"{computed_root_path}/extracted_ids.npy"
-semantic_captions_path = f"{computed_root_path}/semantic_train2014.json"
-
-plays_path = "/data/shake/merged"
-nltk_data_path = "/home/malpunek/.nltk_data"
 
 # Data processing metaparameters
 word_occurance_threshold = args.word_occurance_threshold
@@ -33,9 +19,34 @@ gpu_num = 0
 device_str = "cpu" if not torch.cuda.is_available() else f"cuda:{gpu_num}"
 device = torch.device(device_str)
 
+# Paths
+mscoco_root_path = Path("/data/mscoco")
+mscoco_imgs_path = mscoco_root_path / "train2014"
+captions_path = mscoco_root_path / "annotations/captions_train2014.json"
+
+computed_root_path = Path("/data/computed_shake")
+
+if not computed_root_path.exists():
+    os.makedirs(computed_root_path, exist_ok=True)
+
+features_path = computed_root_path / "extracted_features.hdf5"
+feature_ids_path = computed_root_path / "extracted_ids.npy"
+
+thresh_path = computed_root_path / f"thresh_{word_occurance_threshold}"
+if not thresh_path.exists():
+    os.makedirs(thresh_path, exist_ok=True)
+
+words_path = thresh_path / "words.json"
+word_map_path = thresh_path / "word_map.json"
+semantic_captions_path = thresh_path / "semantic_train2014.json"
+
+plays_path = "/data/shake/merged"
+nltk_data_path = "/home/malpunek/.nltk_data"
+
+
 # Various script options
 
-interactive = True
+interactive = args.interactive
 # TODO timestamps in format?
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
 

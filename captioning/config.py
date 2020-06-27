@@ -36,7 +36,7 @@ thresh_path = computed_root_path / f"thresh_{word_occurance_threshold}"
 if not thresh_path.exists():
     os.makedirs(thresh_path, exist_ok=True)
 
-words_path = thresh_path / "words.json"
+words_path = computed_root_path / "words.json"
 word_map_path = thresh_path / "word_map.json"
 semantic_captions_path = thresh_path / "semantic_train2014.json"
 

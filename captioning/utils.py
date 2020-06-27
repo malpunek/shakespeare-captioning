@@ -8,17 +8,22 @@ def ask_overwrite(path: str) -> bool:
         path (str): Path to file
 
     Returns:
-        bool: True if user wants to overwrite or the program is not in the interactive
-          mode.
+        bool: True if:
+            1) Path does not exist (safe to create the file)
+            2) user confirmed overwrite
     """
-    if interactive and Path(path).exists():
-        while (
-            response := input(f"{path} already present. Overwrite? [y/N]").lower()
-        ) not in "yn":
-            print(
-                "Expecting one of 'YyNn'."
-                f"For default press enter. You've typed: {response}"
-            )
-        if response != "y":
-            return False
-    return True
+    if not Path(path).exists():
+        return True
+
+    # path exists
+    if not interactive:
+        return False
+
+    while (
+        response := input(f"{path} already present. Overwrite? [y/N]").lower()
+    ) not in "yn":
+        print(
+            "Expecting one of 'YyNn'."
+            f"For default press enter. You've typed: {response}"
+        )
+    return response == "y"

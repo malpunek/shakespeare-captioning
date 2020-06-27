@@ -2,7 +2,7 @@
 import json
 import logging
 from collections import Counter
-from itertools import chain
+from itertools import chain, accumulate
 
 from tabulate import tabulate
 from tqdm.auto import tqdm
@@ -44,12 +44,20 @@ def main():
     intersection = check_word_map_intersection(mls, word_map)
     intersection = dict(sorted(intersection.items()))
 
+    cum_sum = {
+        k: v
+        for k, v in zip(
+            reversed(intersection.keys()), accumulate(reversed(intersection.values()))
+        )
+    }
+
     logging.info(
         (
             "\nNumber N of semantic terms/"
             "Number of sentences from plays that produce N semantic terms\n"
+            "Backwards cumulative sum in the lower row\n"
         )
-        + tabulate([intersection], headers="keys")
+        + tabulate([intersection, cum_sum], headers="keys", tablefmt="github")
     )
 
 

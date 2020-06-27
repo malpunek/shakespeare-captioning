@@ -90,7 +90,7 @@ def log_stats(
         f"Got {len_additional_verbs} additional verbs to keep\n"
         + tabulate(counts, headers=headers, tablefmt="github")
         + "\n** With additional verbs\nVerbs/Noun ratio:\n"
-        + tabulate(ratios, tablefmt="github")
+        + tabulate(ratios, headers=["Set", "Ratio"], tablefmt="github")
     )
 
     logging.info(msg)

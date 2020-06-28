@@ -21,7 +21,7 @@ def main():
     plays = get_zipped_plays_paths()
 
     for p in (word_map_path, words_path):
-        if not Path(word_map_path).exists():
+        if not Path(p).exists():
             logging.critical(
                 f"{word_map_path} does not exist. Please create word map first!"
             )

@@ -24,7 +24,9 @@ def caption_to_terms(caption, word_map):
 
 def term_annotation(word_map, ann):
     res = ann.copy()
-    res["caption"] = caption_to_terms(res["caption"], word_map)
+    terms = caption_to_terms(res["caption"], word_map)
+    terms = " ".join(terms)
+    res["caption"] = res
     return res
 
 

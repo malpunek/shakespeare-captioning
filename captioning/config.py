@@ -19,6 +19,9 @@ gpu_num = 0
 device_str = "cpu" if not torch.cuda.is_available() else f"cuda:{gpu_num}"
 device = torch.device(device_str)
 
+
+max_caption_len = 20
+
 # Paths
 mscoco_root_path = Path("/data/mscoco")
 mscoco_imgs_path = mscoco_root_path / "train2014"

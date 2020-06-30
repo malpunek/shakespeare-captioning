@@ -44,8 +44,8 @@ plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"
 
 
-
 extended_word_map_path = thresh_path / "word_map_extended.json"
+encoded_captions_path = thresh_path / "encoded_captions_train2014.json"
 
 # Various script options
 

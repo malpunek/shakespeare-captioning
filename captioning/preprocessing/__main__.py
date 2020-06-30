@@ -1,3 +1,4 @@
+from .encode_captions import main as encode_captions
 from .extend_verbs import main as extend_verbs
 from .extract_tagged_lemmas import main as extract_lemmas
 from .feature_extraction import main as extract_features
@@ -10,5 +11,6 @@ transform_verbs()
 extend_verbs()
 captions_to_semantic_terms()
 plays_word_intersection()
+encode_captions()
 
 extract_features()

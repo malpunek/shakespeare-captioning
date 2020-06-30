@@ -42,7 +42,6 @@ def main():
         caps = json.load(caps_f)
         word_map = json.load(word_map_f)
 
-    caps['annotations'] = caps['annotations'][:1000]
     map_annotations = partial(term_annotation, word_map)
     terms_annotations = list(
         tqdm(

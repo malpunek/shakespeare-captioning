@@ -143,7 +143,7 @@ def main():
     logging.info(f"Saving WordMap to {word_map_path}!")
 
     with open(word_map_path, "w") as f:
-        json.dump(word_map_T, f)
+        json.dump(word_map_T, f, indent=2)
 
 
 # %%

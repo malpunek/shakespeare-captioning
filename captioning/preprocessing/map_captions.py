@@ -55,7 +55,7 @@ def main():
 
     caps["annotations"] = terms_annotations
     with open(semantic_captions_path, "w") as f:
-        json.dump(caps, f)
+        json.dump(caps, f, indent=2)
 
     return caps
 

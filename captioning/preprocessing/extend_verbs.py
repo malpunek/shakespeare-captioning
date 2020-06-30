@@ -69,7 +69,7 @@ def main():
         {f"{verb}_VERB": f"{target}_VERB" for verb, target in additional_verbs.items()}
     )
     with open(word_map_path, "w") as f:
-        json.dump(word_map_T, f)
+        json.dump(word_map_T, f, indent=2)
 
 
 if __name__ == "__main__":

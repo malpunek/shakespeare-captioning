@@ -71,7 +71,7 @@ def main():
         words.update(caption_to_tagged_lemmas(c["caption"]))
 
     with open(words_path, "w") as f:
-        json.dump(dict(words), f)
+        json.dump(dict(words), f, indent=2)
 
     logging.info(f"{len(words)} words saved to {words_path}!")
 

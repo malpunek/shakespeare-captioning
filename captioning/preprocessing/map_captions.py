@@ -12,14 +12,12 @@ from .extract_tagged_lemmas import caption_to_tagged_lemmas
 
 
 def caption_to_terms(caption, word_map):
-    def change_verbs(terms):
+    def map_words(terms):
         for term in terms:
-            if term[-4:] == "NOUN":
-                yield term
-            elif (substitute := word_map.get(term, None)) is not None:
+            if (substitute := word_map.get(term, None)) is not None:
                 yield substitute
 
-    return list(change_verbs(caption_to_tagged_lemmas(caption)))
+    return list(map_words(caption_to_tagged_lemmas(caption)))
 
 
 def term_annotation(word_map, ann):

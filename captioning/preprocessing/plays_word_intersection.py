@@ -20,7 +20,10 @@ def check_word_map_intersection(captions, word_map):
         keeps = list(caption_to_tagged_lemmas(caption))
         return sum(1 for word in keeps if word in all_keepers)
 
-    cts = [count(line) for line in tqdm(captions)]
+    cts = [
+        count(line)
+        for line in tqdm(captions, desc="Computing shakespeare & word map intersection")
+    ]
 
     return Counter(cts)
 

@@ -6,7 +6,7 @@ from pathlib import Path
 
 from tqdm.auto import tqdm
 
-from ..config import captions_path, semantic_captions_path, word_map_path
+from ..config import captions_path, extended_word_map_path, semantic_captions_path
 from ..utils import ask_overwrite
 from .extract_tagged_lemmas import caption_to_tagged_lemmas
 
@@ -29,16 +29,17 @@ def term_annotation(word_map, ann):
 
 
 def main():
-    if not Path(word_map_path).exists():
+
+    if not Path(extended_word_map_path).exists():
         logging.critical(
-            f"{word_map_path} does not exist. Please extract tagged lemmas first!"
+            f"{extended_word_map_path} does not exist. Please extract tagged lemmas first!"  # noqa
         )
         return
 
     if not ask_overwrite(semantic_captions_path):
         return
 
-    with open(captions_path) as caps_f, open(word_map_path) as word_map_f:
+    with open(captions_path) as caps_f, open(extended_word_map_path) as word_map_f:
         caps = json.load(caps_f)
         word_map = json.load(word_map_f)
 

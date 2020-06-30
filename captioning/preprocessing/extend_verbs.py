@@ -6,7 +6,9 @@ from pathlib import Path
 
 from tqdm.auto import tqdm
 
-from ..config import get_zipped_plays_paths, word_map_path, words_path
+from ..config import (extended_word_map_path, get_zipped_plays_paths, word_map_path,
+                      words_path)
+from ..utils import ask_overwrite
 from .extract_tagged_lemmas import caption_to_tagged_lemmas
 from .transform_verbs import find_replacement
 
@@ -20,10 +22,13 @@ def main():
 
     plays = get_zipped_plays_paths()
 
+    if not ask_overwrite(extended_word_map_path):
+        return
+
     for p in (word_map_path, words_path):
         if not Path(p).exists():
             logging.critical(
-                f"{word_map_path} does not exist. Please create word map first!"
+                f"{p} does not exist. Please create word map first!"
             )
             return
 
@@ -68,7 +73,7 @@ def main():
     word_map_T.update(
         {f"{verb}_VERB": f"{target}_VERB" for verb, target in additional_verbs.items()}
     )
-    with open(word_map_path, "w") as f:
+    with open(extended_word_map_path, "w") as f:
         json.dump(word_map_T, f, indent=2)
 
 

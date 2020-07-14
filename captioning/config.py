@@ -34,39 +34,39 @@ max_caption_len = 20
 # Paths
 mscoco_root_path = Path("/data/mscoco")
 computed_root_path = Path("/data/computed_shake")
+thresh_path = computed_root_path / f"thresh_{word_occurance_threshold}"
 
 if not computed_root_path.exists():
     os.makedirs(computed_root_path, exist_ok=True)
+
+if not thresh_path.exists():
+    os.makedirs(thresh_path, exist_ok=True)
 
 coco_train_conf = {
     "name": "Train",
     "imgs_root_path": mscoco_root_path / "train2014",
     "captions_path": mscoco_root_path / "annotations/captions_train2014.json",
-    "features_path": computed_root_path / "train_features.hdf5"
+    "features_path": computed_root_path / "train_features.hdf5",
+    "semantic_captions_path": thresh_path / "semantic_train2014.json",
+    "encoded_captions_path": thresh_path / "encoded_captions_train2014.json",
 }
 
 coco_val_conf = {
     "name": "Validation",
     "imgs_root_path": mscoco_root_path / "val2014",
     "captions_path": mscoco_root_path / "annotations/captions_val2014.json",
-    "features_path": computed_root_path / "val_features.hdf5"
+    "features_path": computed_root_path / "val_features.hdf5",
+    "semantic_captions_path": thresh_path / "semantic_val2014.json",
+    "encoded_captions_path": thresh_path / "encoded_captions_val2014.json",
 }
-
-
-thresh_path = computed_root_path / f"thresh_{word_occurance_threshold}"
-
-if not thresh_path.exists():
-    os.makedirs(thresh_path, exist_ok=True)
 
 words_path = computed_root_path / "words.json"
 word_map_path = thresh_path / "word_map.json"
-semantic_captions_path = thresh_path / "semantic_train2014.json"
+extended_word_map_path = thresh_path / "word_map_extended.json"
 
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"
 
-extended_word_map_path = thresh_path / "word_map_extended.json"
-encoded_captions_path = thresh_path / "encoded_captions_train2014.json"
 
 # Various script options
 

@@ -7,7 +7,7 @@ from typing import Iterable
 import contractions
 from tqdm.auto import tqdm
 
-from ..config import captions_path, load_nlp, words_path
+from ..config import coco_train_conf, load_nlp, words_path
 from ..utils import ask_overwrite
 
 # https://spacy.io/api/annotation
@@ -49,11 +49,6 @@ def caption_to_tagged_lemmas(caption: str) -> Iterable[str]:
     return tokens
 
 
-def get_captions():
-    with open(captions_path) as f:
-        return json.load(f)["annotations"]
-
-
 # %%
 def main():
 
@@ -63,7 +58,8 @@ def main():
     logging.info("Creating new tagged lemma dict.")
 
     logging.info("Loading captions...")
-    caps = get_captions()
+    with open(coco_train_conf["captions_path"]) as f:
+        caps = json.load(f)["annotations"]
     logging.info("Done!")
 
     words = Counter()

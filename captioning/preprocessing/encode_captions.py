@@ -10,7 +10,8 @@ from ..config import (
     encoded_captions_path,
     extended_word_map_path,
     max_caption_len,
-    semantic_captions_path,
+    coco_train_conf,
+    coco_val_conf,
 )
 from ..utils import WordIdxMap, ask_overwrite
 
@@ -32,8 +33,7 @@ def map_annotation_using_mapping(mapping, ann):
     return res
 
 
-def main():
-
+def encode_semantic_captions(conf):
     if not ask_overwrite(encoded_captions_path):
         return
 
@@ -42,9 +42,9 @@ def main():
             f"{extended_word_map_path} does not exist. Please create word map first!"
         )
         return
-    if not Path(semantic_captions_path).exists():
+    if not Path(conf["semantic_captions_path"]).exists():
         logging.critical(
-            f"{semantic_captions_path} does not exist."
+            f"{conf['semantic_captions_path']} does not exist."
             "Please extract semantic captions first!"
         )
         return
@@ -52,7 +52,7 @@ def main():
     with open(extended_word_map_path) as f:
         word_map = json.load(f)
 
-    with open(semantic_captions_path) as f:
+    with open(conf["semantic_captions_path"]) as f:
         caps = json.load(f)
 
     mapping = WordIdxMap(word_map)
@@ -67,6 +67,11 @@ def main():
     )
     with open(encoded_captions_path, "w") as f:
         json.dump(caps, f, indent=2)
+
+
+def main():
+    for conf in (coco_train_conf, coco_val_conf):
+        encode_semantic_captions(conf)
 
 
 if __name__ == "__main__":

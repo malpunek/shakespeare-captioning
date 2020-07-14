@@ -6,7 +6,7 @@ from pathlib import Path
 
 from tqdm.auto import tqdm
 
-from ..config import captions_path, extended_word_map_path, semantic_captions_path
+from ..config import coco_train_conf, coco_val_conf, extended_word_map_path
 from ..utils import ask_overwrite
 from .extract_tagged_lemmas import caption_to_tagged_lemmas
 
@@ -28,7 +28,7 @@ def term_annotation(word_map, ann):
     return res
 
 
-def main():
+def to_semantic_terms(conf):
 
     if not Path(extended_word_map_path).exists():
         logging.critical(
@@ -36,10 +36,12 @@ def main():
         )
         return
 
-    if not ask_overwrite(semantic_captions_path):
+    if not ask_overwrite(conf["semantic_captions_path"]):
         return
 
-    with open(captions_path) as caps_f, open(extended_word_map_path) as word_map_f:
+    with open(conf["captions_path"]) as caps_f, open(
+        extended_word_map_path
+    ) as word_map_f:
         caps = json.load(caps_f)
         word_map = json.load(word_map_f)
 
@@ -53,10 +55,15 @@ def main():
     )
 
     caps["annotations"] = terms_annotations
-    with open(semantic_captions_path, "w") as f:
+    with open(conf["semantic_captions_path"], "w") as f:
         json.dump(caps, f, indent=2)
 
     return caps
+
+
+def main():
+    for conf in (coco_train_conf, coco_val_conf):
+        to_semantic_terms(conf)
 
 
 if __name__ == "__main__":

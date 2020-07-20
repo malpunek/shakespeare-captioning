@@ -49,6 +49,7 @@ coco_train_conf = {
     "features_path": computed_root_path / "train_features.hdf5",
     "semantic_captions_path": thresh_path / "semantic_train2014.json",
     "encoded_captions_path": thresh_path / "encoded_captions_train2014.json",
+    "transformed_data_path": thresh_path / "training_full.hdf5",
 }
 
 coco_val_conf = {
@@ -95,7 +96,7 @@ def _get_dataset(dataset_conf):
     )
 
     return CocoCaptions(
-        dataset_conf["imgs_root_path"], dataset_conf["captions_path"], transforms=t
+        dataset_conf["imgs_root_path"], dataset_conf["captions_path"], transform=t
     )
 
 

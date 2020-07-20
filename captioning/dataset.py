@@ -1,34 +1,42 @@
-from pathlib import Path
-from operator import itemgetter
 import h5py
-from torch.utils.data.dataset import Dataset
+from torch.utils.data import Dataset
 
 
-class CocoFeatureCaptionDataset(Dataset):
-    def __init__(self, hdf5_path, *caption_paths):
-        assert caption_paths
-        self.hdf5_file = h5py.File(Path(hdf5_path).expanduser(), "r")
-        self.features = self.hdf5_file["features"]
+class CaptionHdf5Dataset(Dataset):
+    def __init__(self, features_file, data_file):
+        super().__init__(self)
+        self.features_file = h5py.File(features_file, "r", driver="core")
+        self.data_file = h5py.File(data_file, "r")
 
-        from pycocotools.coco import COCO
-
-        self.coco_providers = [COCO(cp) for cp in caption_paths]
-        self.main_coco = self.coco_providers[0]
-        self.ids = list(sorted(self.main_coco.imgs.keys()))
-
-    def __len__(self):
-        return len(self.features)
+        self.features = self.features_file["features"]
+        self.encoded_caps = self.data_file["encoded_caps"]
+        self.feat_ids = self.data_file["feat_ids"]
 
     def __getitem__(self, idx):
-        img_id = self.ids[idx]
-        ann_ids = self.main_coco.getAnnIds(imgIds=img_id)
-
-        all_targets = (
-            list(map(itemgetter("caption"), coco.loadAnns(ann_ids)))
-            for coco in self.coco_providers
-        )
-
-        return self.features[idx], *all_targets
+        feat_id = self.feat_ids[idx]
+        return self.features[feat_id], self.encoded_caps[idx]
 
     def close(self):
-        self.hdf5_file.close()
+        self.features_file.close()
+        self.data_file.close()
+
+
+class FullHdf5Dataset(CaptionHdf5Dataset):
+    def __init__(self):
+        super().__init__()
+        self.coco_ids = self.features_file["ids"]
+
+        self.filenames = self.data_file["filenames"]
+        self.coco_caps = self.data_file["coco_caps"]
+        self.semantic_caps = self.data_file["semantic_caps"]
+
+    def __getitem__(self, idx):
+        feat_id = self.feat_ids[idx]
+        return {
+            "features": self.features[feat_id],
+            "coco_id": self.coco_ids[feat_id],
+            "filename": self.filenames[idx],
+            "coco_cap": self.coco_caps[idx],
+            "semantic_cap": self.semantic_caps[idx],
+            "encoded_cap": self.encoded_caps[idx],
+        }

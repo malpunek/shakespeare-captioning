@@ -2,6 +2,8 @@
 import json
 import logging
 from collections import Counter
+from multiprocessing import Pool
+from operator import itemgetter
 from typing import Iterable
 
 import contractions
@@ -63,8 +65,14 @@ def main():
     logging.info("Done!")
 
     words = Counter()
-    for c in tqdm(caps, desc="Extracting & counting words..."):
-        words.update(caption_to_tagged_lemmas(c["caption"]))
+
+    with Pool() as p:
+        tagged_lemmas = p.imap(
+            caption_to_tagged_lemmas, map(itemgetter("caption"), caps), chunksize=8
+        )
+
+        for lemmas in tqdm(tagged_lemmas, desc="Extracting & counting words..."):
+            words.update(lemmas)
 
     with open(words_path, "w") as f:
         json.dump(dict(words), f, indent=2)

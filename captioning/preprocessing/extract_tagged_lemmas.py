@@ -40,15 +40,34 @@ POS_IN = [
 ]
 
 
-def caption_to_tagged_lemmas(caption: str) -> Iterable[str]:
-    nlp = load_nlp()
-    caption = contractions.fix(caption)
-    tokens = nlp(caption)
-    # A. Filtering non-semantic words
-    tokens = filter(lambda x: x.pos_ in POS_IN, tokens)
-    # B. Lemmatization and tagging.
-    tokens = map(lambda t: f"{t.lemma_.lower()}_{t.pos_}", tokens)
-    return tokens
+# Local functions (or local lambdas) aren't picklable and thus can't be
+# run via multiprocessing.Pool. And I wanted to keep all this logic
+# in enclosed scope
+# (https://stackoverflow.com/questions/4827432/)
+class TaggerFilterLemmatizer:
+    """Converts captions to tagged lemmas.
+    """
+
+    @staticmethod
+    def non_semantic_word_filter(x):
+        return x.pos_ in POS_IN
+
+    @staticmethod
+    def lemmatize_and_tag(x):
+        return f"{x.lemma_.lower()}_{x.pos_}"
+
+    def caption_to_tagged_lemmas(self, caption: str) -> Iterable[str]:
+        nlp = load_nlp()
+        caption = contractions.fix(caption)
+        tokens = nlp(caption)
+        # A. Filtering non-semantic words
+        tokens = filter(self.non_semantic_word_filter, tokens)
+        # B. Lemmatization and tagging.
+        tokens = map(self.lemmatize_and_tag, tokens)
+        return list(tokens)
+
+    def __call__(self, caption: str) -> Iterable[str]:
+        return self.caption_to_tagged_lemmas(caption)
 
 
 # %%
@@ -68,10 +87,12 @@ def main():
 
     with Pool() as p:
         tagged_lemmas = p.imap(
-            caption_to_tagged_lemmas, map(itemgetter("caption"), caps), chunksize=8
+            TaggerFilterLemmatizer(), map(itemgetter("caption"), caps), chunksize=8
         )
 
-        for lemmas in tqdm(tagged_lemmas, desc="Extracting & counting words..."):
+        for lemmas in tqdm(
+            tagged_lemmas, desc="Extracting & counting words...", total=len(caps)
+        ):
             words.update(lemmas)
 
     with open(words_path, "w") as f:

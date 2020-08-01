@@ -3,21 +3,26 @@ import json
 import logging
 from functools import partial
 from pathlib import Path
+from multiprocessing import Pool
 
 from tqdm.auto import tqdm
 
 from ..config import coco_train_conf, coco_val_conf, extended_word_map_path
 from ..utils import ask_overwrite
-from .extract_tagged_lemmas import caption_to_tagged_lemmas
+from .extract_tagged_lemmas import TaggerFilterLemmatizer
+
+
+tfl = TaggerFilterLemmatizer()
+
+
+def map_words(terms, word_map):
+    for term in terms:
+        if (substitute := word_map.get(term, None)) is not None:
+            yield substitute
 
 
 def caption_to_terms(caption, word_map):
-    def map_words(terms):
-        for term in terms:
-            if (substitute := word_map.get(term, None)) is not None:
-                yield substitute
-
-    return list(map_words(caption_to_tagged_lemmas(caption)))
+    return list(map_words(tfl(caption), word_map))
 
 
 def term_annotation(word_map, ann):
@@ -45,14 +50,16 @@ def to_semantic_terms(conf):
         caps = json.load(caps_f)
         word_map = json.load(word_map_f)
 
-    map_annotations = partial(term_annotation, word_map)
-    terms_annotations = list(
-        tqdm(
-            map(map_annotations, caps["annotations"]),
+    with Pool() as p:
+        map_annotations = partial(term_annotation, word_map)
+
+        terms_annotations = p.imap(map_annotations, caps["annotations"])
+        terms_annotations = tqdm(
+            terms_annotations,
             total=len(caps["annotations"]),
             desc="Mapping annotations to semantic term format",
         )
-    )
+        terms_annotations = list(terms_annotations)
 
     caps["annotations"] = terms_annotations
     with open(conf["semantic_captions_path"], "w") as f:

@@ -29,6 +29,7 @@ class CocoFeatureCaptionDataset(Dataset):
         result = 0
         for _, *caps in tqdm(self, desc="Computing number of captions"):
             result += min(map(lambda c: len(c), caps))
+        return result
 
     def __getitem__(self, idx):
         img_id = self.ids[idx]
@@ -73,29 +74,29 @@ def main():
         for feat_idx, (_, filename, *caps) in enumerate(
             tqdm(dataset, desc="Constructing HDF5 file")
         ):
-            for cap in zip(caps):
+            for cap in zip(*caps):
                 feat_ids[idx] = feat_idx
                 coco_caps[idx] = cap[0]
                 semantic_caps[idx] = cap[1]
-                encoded_caps[idx] = cap[2]
+                encoded_caps[idx] = " ".join(map(lambda x: str(x), cap[2]))
                 filenames[idx] = filename
                 idx += 1
 
-    with coco_train_conf as ctc:
-        if not ask_overwrite(ctc["transformed_data_path"]):
-            return
+    ctc = coco_train_conf
+    if not ask_overwrite(ctc["transformed_data_path"]):
+        return
 
-        hdf5_fname = Path(ctc["transformed_data_path"])
-        hdf5_fname.unlink(missing_ok=True)
+    hdf5_fname = Path(ctc["transformed_data_path"])
+    hdf5_fname.unlink(missing_ok=True)
 
-        dataset = CocoFeatureCaptionDataset(
-            ctc["features_path"],
-            ctc["captions_path"],
-            ctc["semantic_captions_path"],
-            ctc["encoded_captions_path"],
-        )
-        with h5py.File(ctc["transformed_data_path"], "w") as final:
-            make_transformation(final, dataset)
+    dataset = CocoFeatureCaptionDataset(
+        ctc["features_path"],
+        ctc["captions_path"],
+        ctc["semantic_captions_path"],
+        ctc["encoded_captions_path"],
+    )
+    with h5py.File(ctc["transformed_data_path"], "w") as final:
+        make_transformation(final, dataset)
 
 
 # %%

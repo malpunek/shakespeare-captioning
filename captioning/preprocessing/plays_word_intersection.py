@@ -8,16 +8,19 @@ from tabulate import tabulate
 from tqdm.auto import tqdm
 
 from ..config import get_zipped_plays_paths, word_map_path
-from .extract_tagged_lemmas import caption_to_tagged_lemmas
+from .extract_tagged_lemmas import TaggerFilterLemmatizer
 
 
 # %%
+tfl = TaggerFilterLemmatizer()
+
+
 def check_word_map_intersection(captions, word_map):
 
     all_keepers = set(word_map.keys())
 
     def count(caption):
-        keeps = list(caption_to_tagged_lemmas(caption))
+        keeps = list(tfl(caption))
         return sum(1 for word in keeps if word in all_keepers)
 
     cts = [

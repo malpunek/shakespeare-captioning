@@ -9,7 +9,7 @@ from tqdm.auto import tqdm
 from ..config import (extended_word_map_path, get_zipped_plays_paths, word_map_path,
                       words_path)
 from ..utils import ask_overwrite
-from .extract_tagged_lemmas import caption_to_tagged_lemmas
+from .extract_tagged_lemmas import TaggerFilterLemmatizer
 from .transform_verbs import find_replacement
 
 
@@ -48,9 +48,10 @@ def main():
     modern_captions = list(
         chain.from_iterable((file_to_list(modern) for modern, _ in plays))
     )
+    tfl = TaggerFilterLemmatizer()
     modern_lemmas_T = chain.from_iterable(
         [
-            caption_to_tagged_lemmas(c)
+            tfl(c)
             for c in tqdm(
                 modern_captions, desc="Extracting tagged lemmas from modern plays"
             )

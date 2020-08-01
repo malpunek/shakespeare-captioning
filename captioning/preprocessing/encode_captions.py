@@ -7,7 +7,6 @@ from itertools import chain
 from functools import partial
 
 from ..config import (
-    encoded_captions_path,
     extended_word_map_path,
     max_caption_len,
     coco_train_conf,
@@ -34,7 +33,7 @@ def map_annotation_using_mapping(mapping, ann):
 
 
 def encode_semantic_captions(conf):
-    if not ask_overwrite(encoded_captions_path):
+    if not ask_overwrite(conf["encoded_captions_path"]):
         return
 
     if not Path(extended_word_map_path).exists():
@@ -65,7 +64,7 @@ def encode_semantic_captions(conf):
             desc="Encoding captions",
         )
     )
-    with open(encoded_captions_path, "w") as f:
+    with open(conf["encoded_captions_path"], "w") as f:
         json.dump(caps, f, indent=2)
 
 

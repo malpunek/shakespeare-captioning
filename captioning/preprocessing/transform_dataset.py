@@ -5,7 +5,7 @@ import h5py
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
-from ..config import coco_train_conf
+from ..config import coco_train_conf, max_caption_len
 from ..utils import ask_overwrite
 
 
@@ -67,7 +67,7 @@ def main():
             "semantic_caps", (data_len,), dtype=h5py.string_dtype()
         )
         encoded_caps = f.create_dataset(
-            "encoded_caps", (data_len,), dtype=h5py.string_dtype()
+            "encoded_caps", (data_len, max_caption_len + 1), dtype="i"
         )
 
         idx = 0
@@ -78,7 +78,7 @@ def main():
                 feat_ids[idx] = feat_idx
                 coco_caps[idx] = cap[0]
                 semantic_caps[idx] = cap[1]
-                encoded_caps[idx] = " ".join(map(lambda x: str(x), cap[2]))
+                encoded_caps[idx] = cap[2]
                 filenames[idx] = filename
                 idx += 1
 

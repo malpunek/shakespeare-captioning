@@ -17,6 +17,7 @@ def lazy(func):
 parser = argparse.ArgumentParser()
 parser.add_argument("-t", "--word_occurance_threshold", type=int, default=25)
 parser.add_argument("-i", "--interactive", action="store_true")
+parser.add_argument("-x", "--experiment", type=int, default=0)
 args = parser.parse_args()
 
 # Data processing metaparameters
@@ -27,7 +28,7 @@ device_str = "cpu" if not torch.cuda.is_available() else f"cuda:{gpu_num}"
 device = torch.device(device_str)
 
 first_stage = {"batch_size": 16, "learning_rate": 0.001, "epochs": 10}
-
+experiment_folder = Path(f"runs/exp_{args.experiment:03d}")
 
 max_caption_len = 20
 

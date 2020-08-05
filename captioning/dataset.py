@@ -1,16 +1,21 @@
 import h5py
+import numpy as np
 from torch.utils.data import Dataset
 
 
 class CaptionHdf5Dataset(Dataset):
     def __init__(self, features_file, data_file):
-        super().__init__(self)
+        super().__init__()
         self.features_file = h5py.File(features_file, "r", driver="core")
-        self.data_file = h5py.File(data_file, "r")
+        self.data_file = h5py.File(data_file, "r", driver="core")
 
         self.features = self.features_file["features"]
-        self.encoded_caps = self.data_file["encoded_caps"]
         self.feat_ids = self.data_file["feat_ids"]
+        self.encoded_caps = self.data_file["encoded_caps"]
+        self.encoded_caps._local.astype = np.dtype("long")
+
+    def __len__(self):
+        return len(self.feat_ids)
 
     def __getitem__(self, idx):
         feat_id = self.feat_ids[idx]

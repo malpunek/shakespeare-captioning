@@ -22,7 +22,7 @@ def encode_caption(mapping, caption):
     end = (mapping["<end>"],)
     pad = (mapping["<pad>"] for _ in range(max_caption_len - 2 - len(terms)))
     term_len = (len(terms),)
-    terms = chain(start, (mapping[term] for term in terms), end, pad, term_len)
+    terms = chain(start, mapping.encode(terms), end, pad, term_len)
     return list(terms)
 
 

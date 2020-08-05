@@ -4,6 +4,17 @@ from pathlib import Path
 from .config import interactive
 
 
+def get_yn_response(question: str) -> bool:
+    while (
+        response := input(question).lower()
+    ) not in "yn":
+        print(
+            "Expecting one of 'YyNn'."
+            f"For default press enter. You've typed: {response}"
+        )
+    return response == "y"
+
+
 def ask_overwrite(path: str) -> bool:
     """
     Args:
@@ -21,14 +32,7 @@ def ask_overwrite(path: str) -> bool:
     if not interactive:
         return False
 
-    while (
-        response := input(f"{path} already present. Overwrite? [y/N]").lower()
-    ) not in "yn":
-        print(
-            "Expecting one of 'YyNn'."
-            f"For default press enter. You've typed: {response}"
-        )
-    return response == "y"
+    return get_yn_response(f"{path} already present. Overwrite? [y/N]")
 
 
 class WordIdxMap:
@@ -43,4 +47,12 @@ class WordIdxMap:
         if isinstance(x, int):
             return self.idx2word[x]
         else:
-            return self.word2idx[x]
+            if (mapping := self.word2idx.get(x, None)) is not None:
+                return mapping
+            return self.word2idx["<unk>"]
+
+    def encode(self, words):
+        return (self[w] for w in words)
+
+    def decode(self, encoded_caption):
+        return (self[idx] for idx in encoded_caption)

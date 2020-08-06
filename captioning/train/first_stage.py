@@ -86,8 +86,10 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
 
                 model.eval()
                 words, confidence = model.forward_eval(sample_feats.to(device), mapping)
+
+                sample_caption = sample_caption.reshape((-1)).tolist()
                 writer.add_text(
-                    "Target", f"{mapping.decode(sample_caption.reshape((-1)).tolist())}"
+                    "Target", f"{list(mapping.decode(sample_caption))}",
                 )
                 writer.add_text("Predictions", f"{words}")
                 writer.add_scalar(
@@ -153,7 +155,6 @@ def main():
                 )
                 bleu_score = evaluate(trained_model, mapping)
                 writer.add_scalar("BLEU-score", bleu_score)
-
 
         except:  # noqa
             if get_yn_response("Remove experiment folder? [y/N]"):

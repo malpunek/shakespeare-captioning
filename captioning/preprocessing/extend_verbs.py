@@ -18,6 +18,10 @@ def file_to_list(path):
         return list(f)
 
 
+def strip_POS_tag(word):
+    return word[:-5]
+
+
 def main():
 
     plays = get_zipped_plays_paths()
@@ -59,7 +63,7 @@ def main():
     )
 
     modern_verbs = filter(lambda x: x[-4:] == "VERB", modern_lemmas_T)
-    modern_verbs = set(map(lambda x: x[:-5], modern_verbs))
+    modern_verbs = set(map(strip_POS_tag, modern_verbs))
     modern_verbs = list(filter(lambda x: x not in verbs_to_keep, modern_verbs))
     logging.info(f"Trying to preserve {len(modern_verbs)} shakespeare-only verbs")
 

@@ -1,5 +1,8 @@
+import os
+
 import h5py
 import numpy as np
+from PIL import Image
 from torch.utils.data import Dataset
 
 
@@ -27,8 +30,8 @@ class CaptionHdf5Dataset(Dataset):
 
 
 class FullHdf5Dataset(CaptionHdf5Dataset):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.coco_ids = self.features_file["ids"]
 
         self.filenames = self.data_file["filenames"]
@@ -45,3 +48,51 @@ class FullHdf5Dataset(CaptionHdf5Dataset):
             "semantic_cap": self.semantic_caps[idx],
             "encoded_cap": self.encoded_caps[idx],
         }
+
+
+class ValidationDataset(Dataset):
+    """Slightly altered torchvision.datasets.CocoCaptions
+    Provides img features instead of the image itself
+    """
+
+    def __init__(self, coco_file, features_file):
+        super().__init__()
+        from pycocotools.coco import COCO
+
+        self.coco = COCO(coco_file)
+        self.ids = list(sorted(self.coco.imgs.keys()))
+
+        self.features_file = h5py.File(features_file, "r", driver="core")
+        self.features = self.features_file["features"]
+        self.coco_ids = self.features_file["feat_ids"]
+
+    def __getitem__(self, index):
+        assert self.ids[index] == self.coco_ids[index]
+        feats = self.features[index]
+
+        ann_ids = self.coco.getAnnIds(imgIds=self.ids[index])
+        anns = self.coco.loadAnns(ann_ids)
+        target = [ann["caption"] for ann in anns]
+
+        return feats, target
+
+    def __len__(self):
+        return len(self.ids)
+
+    def close(self):
+        self.features_file.close()
+
+
+class QualitativeDataset(ValidationDataset):
+    def __init__(self, img_folder, *args):
+        super().__init__(*args)
+        self.img_folder = img_folder
+
+    def __getitem__(self, index):
+        feats, caps = super().__getitem__()
+
+        img_id = self.ids[index]
+        path = self.coco.loadImgs(img_id)[0]["file_name"]
+        img = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
+
+        return feats, caps, img

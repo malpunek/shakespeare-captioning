@@ -123,4 +123,4 @@ class TermDecoder(nn.Module):
                 break
             last_word_decoded = topi.reshape((1, 1)).detach()
 
-        return mapping.decode(words_decoded), confidence
+        return list(mapping.decode(words_decoded)), confidence

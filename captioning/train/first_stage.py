@@ -1,5 +1,6 @@
 import json
-from contextlib import closing
+import os
+from contextlib import closing, redirect_stdout
 from itertools import islice
 
 import torch
@@ -46,7 +47,7 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
     )
     sample_feats, sample_caption, sample_caption_len = to_batch_format(dataset[0])
 
-    model = model.train()
+    model = model.train().to("cpu")
     writer.add_graph(
         model, input_to_model=(sample_feats, sample_caption, sample_caption_len)
     )
@@ -54,6 +55,7 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
 
     for epoch in trange(first_stage["epochs"], desc="Epochs"):
         running_loss = 0
+        model = model.train()
 
         for i, data in enumerate(tqdm(dataloader, desc="Batches")):
             features, captions = data
@@ -87,11 +89,11 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
                 model.eval()
                 words, confidence = model.forward_eval(sample_feats.to(device), mapping)
 
-                sample_caption = sample_caption.reshape((-1)).tolist()
+                tmp = sample_caption.reshape((-1)).tolist()
                 writer.add_text(
-                    "Target", f"{list(mapping.decode(sample_caption))}",
+                    "Target", f"{list(mapping.decode(tmp))}", step_number
                 )
-                writer.add_text("Predictions", f"{words}")
+                writer.add_text("Predictions", f"{words}", step_number)
                 writer.add_scalar(
                     "Mean confidence", sum(confidence) / len(confidence), step_number
                 )
@@ -104,9 +106,11 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
 
 def evaluate(model, mapping):
 
-    dataset = ValidationDataset(
-        coco_val_conf["captions_path"], coco_val_conf["features_path"]
-    )
+    with open(os.devnull, "w") as f, redirect_stdout(f):
+
+        dataset = ValidationDataset(
+            coco_val_conf["semantic_captions_path"], coco_val_conf["features_path"]
+        )
 
     model.eval()
     model.to(device)
@@ -114,10 +118,11 @@ def evaluate(model, mapping):
     score = 0
 
     for feats, targets in tqdm(islice(dataset, 1000), total=1000, desc="Evaluating"):
-        feats.unsqueeze(0)
+        feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
         prediction = prediction[1:-1]  # strip <start> and <end>
-        prediction = list(map(strip_POS_tag, prediction))
+        # prediction = list(map(strip_POS_tag, prediction))
+        targets = list(map(lambda t: t.split(" "), targets))
         score += sentence_bleu(targets, prediction)
 
     score /= 1000
@@ -140,6 +145,8 @@ def main():
     vocab_size = len(word_map) + 4  # <start>, <unk>, <pad>, <end>
     # TODO: config
     model = TermDecoder(vocab_size, 2048, 2048)
+
+    print(f"SCORE: {evaluate(model, mapping)}")
 
     criterion = nn.NLLLoss()  # TODO try nn.MSELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=first_stage["learning_rate"])

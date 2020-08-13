@@ -64,7 +64,7 @@ class ValidationDataset(Dataset):
 
         self.features_file = h5py.File(features_file, "r", driver="core")
         self.features = self.features_file["features"]
-        self.coco_ids = self.features_file["feat_ids"]
+        self.coco_ids = self.features_file["ids"]
 
     def __getitem__(self, index):
         assert self.ids[index] == self.coco_ids[index]

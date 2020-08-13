@@ -19,7 +19,6 @@ from ..config import (
     coco_val_conf,
     experiment_folder,
 )
-from ..preprocessing.extend_verbs import strip_POS_tag
 from ..dataset import CaptionHdf5Dataset, ValidationDataset
 from ..model import TermDecoder
 from ..utils import WordIdxMap, get_yn_response
@@ -90,9 +89,7 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
                 words, confidence = model.forward_eval(sample_feats.to(device), mapping)
 
                 tmp = sample_caption.reshape((-1)).tolist()
-                writer.add_text(
-                    "Target", f"{list(mapping.decode(tmp))}", step_number
-                )
+                writer.add_text("Target", f"{list(mapping.decode(tmp))}", step_number)
                 writer.add_text("Predictions", f"{words}", step_number)
                 writer.add_scalar(
                     "Mean confidence", sum(confidence) / len(confidence), step_number
@@ -121,7 +118,7 @@ def evaluate(model, mapping):
         feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
         prediction = prediction[1:-1]  # strip <start> and <end>
-        # prediction = list(map(strip_POS_tag, prediction))
+        # strip_POS_tag
         targets = list(map(lambda t: t.split(" "), targets))
         score += sentence_bleu(targets, prediction)
 
@@ -158,10 +155,14 @@ def main():
             ):
                 torch.save(
                     trained_model.state_dict(),
-                    experiment_folder / f"model_ep{epoch:03d}.pth",
+                    experiment_folder / f"model_ep{(epoch + 1):03d}.pth",
                 )
                 bleu_score = evaluate(trained_model, mapping)
-                writer.add_scalar("BLEU-score", bleu_score)
+                writer.add_scalar(
+                    "BLEU-score",
+                    bleu_score,
+                    (epoch + 1) * len(dataset) // first_stage["batch_size"],
+                )
 
         except:  # noqa
             if get_yn_response("Remove experiment folder? [y/N]"):

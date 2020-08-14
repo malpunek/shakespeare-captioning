@@ -124,3 +124,17 @@ class TermDecoder(nn.Module):
             last_word_decoded = topi.reshape((1, 1)).detach()
 
         return list(mapping.decode(words_decoded)), confidence
+
+
+class ImgToTermNet(nn.Module):
+    def __init__(self, term_decoder, extractor=None):
+        super().__init__()
+        self.term_decoder = term_decoder
+        self.extractor = extractor or FeatureExtractor()
+
+    def forward(self, img, mapping):
+        """Only for evaluation"""
+        feats = self.extractor(img)
+        terms, confidence = self.term_decoder.forward_eval(feats, mapping)
+        return terms, confidence
+

@@ -83,6 +83,10 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(_handler)
 
 
+def last_checkpoint_path():
+    return sorted(experiment_folder.glob("*.pth"))[-1]
+
+
 def setup_nltk():
     import nltk  # noqa: E402
 
@@ -90,20 +94,22 @@ def setup_nltk():
         nltk.data.path.append(nltk_data_path)
 
 
+image_transform = transforms.Compose(
+    [
+        transforms.Resize(256),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    ]
+)
+
+
 # ######## Lazy #############
-
-
 def _get_dataset(dataset_conf):
-    t = transforms.Compose(
-        [
-            transforms.Resize(256),
-            transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ]
-    )
 
     return CocoCaptions(
-        dataset_conf["imgs_root_path"], dataset_conf["captions_path"], transform=t
+        dataset_conf["imgs_root_path"],
+        dataset_conf["captions_path"],
+        transform=image_transform,
     )
 
 

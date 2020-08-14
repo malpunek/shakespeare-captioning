@@ -1,6 +1,5 @@
 # %%
 import json
-import logging
 from operator import itemgetter
 from pathlib import Path
 from typing import Dict, Optional
@@ -11,6 +10,7 @@ from tqdm.auto import tqdm
 
 from ..config import (
     load_wn,
+    logger,
     word_map_path,
     word_occurance_threshold as threshold,
     words_path,
@@ -93,13 +93,13 @@ def log_stats(
         + tabulate(ratios, headers=["Set", "Ratio"], tablefmt="github")
     )
 
-    logging.info(msg)
+    logger.info(msg)
 
 
 def main():
 
     if not Path(words_path).exists():
-        logging.critical(
+        logger.critical(
             f"{words_path} does not exist. Please extract tagged lemmas first!"
         )
         return
@@ -116,7 +116,7 @@ def main():
     words_to_keep_T = {w: cnt for w, cnt in words_T.items() if cnt >= threshold}
     verbs_to_keep = {v: cnt for v, cnt in verbs.items() if cnt >= threshold}
 
-    logging.info(
+    logger.info(
         f"There are {len(verbs_to_keep)} verbs to keep before sense generalization"
     )
 
@@ -140,7 +140,7 @@ def main():
         {f"{verb}_VERB": f"{target}_VERB" for verb, target in additional_verbs.items()}
     )
 
-    logging.info(f"Saving WordMap to {word_map_path}!")
+    logger.info(f"Saving WordMap to {word_map_path}!")
 
     with open(word_map_path, "w") as f:
         json.dump(word_map_T, f, indent=2)

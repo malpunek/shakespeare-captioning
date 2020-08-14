@@ -1,13 +1,12 @@
 # %%
 import json
-import logging
 from collections import Counter
 from itertools import chain, accumulate
 
 from tabulate import tabulate
 from tqdm.auto import tqdm
 
-from ..config import get_zipped_plays_paths, word_map_path
+from ..config import get_zipped_plays_paths, logger, word_map_path
 from .extract_tagged_lemmas import TaggerFilterLemmatizer
 
 
@@ -57,7 +56,7 @@ def main():
         )
     }
 
-    logging.info(
+    logger.info(
         (
             "\nNumber N of semantic terms/"
             "Number of sentences from plays that produce N semantic terms\n"

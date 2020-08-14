@@ -1,16 +1,16 @@
 import json
-import logging
+from functools import partial
+from itertools import chain
 from pathlib import Path
 
 from tqdm.auto import tqdm
-from itertools import chain
-from functools import partial
 
 from ..config import (
-    extended_word_map_path,
-    max_caption_len,
     coco_train_conf,
     coco_val_conf,
+    extended_word_map_path,
+    logger,
+    max_caption_len,
 )
 from ..utils import WordIdxMap, ask_overwrite
 
@@ -37,12 +37,12 @@ def encode_semantic_captions(conf):
         return
 
     if not Path(extended_word_map_path).exists():
-        logging.critical(
+        logger.critical(
             f"{extended_word_map_path} does not exist. Please create word map first!"
         )
         return
     if not Path(conf["semantic_captions_path"]).exists():
-        logging.critical(
+        logger.critical(
             f"{conf['semantic_captions_path']} does not exist."
             "Please extract semantic captions first!"
         )

@@ -1,13 +1,17 @@
 import json
-import logging
 from itertools import chain
 from operator import itemgetter
 from pathlib import Path
 
 from tqdm.auto import tqdm
 
-from ..config import (extended_word_map_path, get_zipped_plays_paths, word_map_path,
-                      words_path)
+from ..config import (
+    extended_word_map_path,
+    get_zipped_plays_paths,
+    logger,
+    word_map_path,
+    words_path,
+)
 from ..utils import ask_overwrite
 from .extract_tagged_lemmas import TaggerFilterLemmatizer
 from .transform_verbs import find_replacement
@@ -31,9 +35,7 @@ def main():
 
     for p in (word_map_path, words_path):
         if not Path(p).exists():
-            logging.critical(
-                f"{p} does not exist. Please create word map first!"
-            )
+            logger.critical(f"{p} does not exist. Please create word map first!")
             return
 
     with open(word_map_path) as f:
@@ -65,7 +67,7 @@ def main():
     modern_verbs = filter(lambda x: x[-4:] == "VERB", modern_lemmas_T)
     modern_verbs = set(map(strip_POS_tag, modern_verbs))
     modern_verbs = list(filter(lambda x: x not in verbs_to_keep, modern_verbs))
-    logging.info(f"Trying to preserve {len(modern_verbs)} shakespeare-only verbs")
+    logger.info(f"Trying to preserve {len(modern_verbs)} shakespeare-only verbs")
 
     additional_verbs = {
         verb: find_replacement(verb, verbs_to_keep)
@@ -73,7 +75,7 @@ def main():
     }
     additional_verbs = dict(filter(itemgetter(1), additional_verbs.items()))
 
-    logging.info(f"Found {len(additional_verbs)} additional verbs")
+    logger.info(f"Found {len(additional_verbs)} additional verbs")
 
     word_map_T.update(
         {f"{verb}_VERB": f"{target}_VERB" for verb, target in additional_verbs.items()}

@@ -73,8 +73,14 @@ nltk_data_path = "/home/malpunek/.nltk_data"
 # Various script options
 
 interactive = args.interactive
-# TODO timestamps in format?
-logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.DEBUG)
+
+logging.basicConfig(format="LIB %(name)s: %(message)s")
+
+_handler = logging.StreamHandler()
+_handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+logger = logging.getLogger(__package__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(_handler)
 
 
 def setup_nltk():
@@ -133,19 +139,19 @@ def load_wn():
 def load_nlp(model="en_core_web_lg"):
     import spacy
 
-    logging.info(f"Loading spacy model {model}..")
+    logger.info(f"Loading spacy model {model}..")
 
     def worker():
         try:
             return spacy.load(model)
         except OSError:
-            logging.info("Model not found. Downloading...")
+            logger.info("Model not found. Downloading...")
             spacy.cli.download(model)
-            logging.info("Spacy model downloaded!")
+            logger.info("Spacy model downloaded!")
             return spacy.load(model)
 
     nlp = worker()
-    logging.info(f"Spacy model {model} loaded!")
+    logger.info(f"Spacy model {model} loaded!")
     return nlp
 
 
@@ -206,5 +212,5 @@ def pick_gpu():
         device_str = f"cuda:{x}"
 
     device = torch.device(device_str)
-    logging.info(f"Using {device}")
+    logger.info(f"Using {device}")
     return device

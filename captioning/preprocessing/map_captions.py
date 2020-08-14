@@ -1,16 +1,14 @@
 # %%
 import json
-import logging
 from functools import partial
-from pathlib import Path
 from multiprocessing import Pool
+from pathlib import Path
 
 from tqdm.auto import tqdm
 
-from ..config import coco_train_conf, coco_val_conf, extended_word_map_path
+from ..config import coco_train_conf, coco_val_conf, extended_word_map_path, logger
 from ..utils import ask_overwrite
 from .extract_tagged_lemmas import TaggerFilterLemmatizer
-
 
 tfl = TaggerFilterLemmatizer()
 
@@ -36,7 +34,7 @@ def term_annotation(word_map, ann):
 def to_semantic_terms(conf):
 
     if not Path(extended_word_map_path).exists():
-        logging.critical(
+        logger.critical(
             f"{extended_word_map_path} does not exist. Please extract tagged lemmas first!"  # noqa
         )
         return

@@ -1,6 +1,5 @@
 # %%
 import json
-import logging
 from collections import Counter
 from multiprocessing import Pool
 from operator import itemgetter
@@ -9,7 +8,7 @@ from typing import Iterable
 import contractions
 from tqdm.auto import tqdm
 
-from ..config import coco_train_conf, load_nlp, words_path
+from ..config import coco_train_conf, load_nlp, logger, words_path
 from ..utils import ask_overwrite
 
 # https://spacy.io/api/annotation
@@ -76,12 +75,12 @@ def main():
     if not ask_overwrite(words_path):
         return
 
-    logging.info("Creating new tagged lemma dict.")
+    logger.info("Creating new tagged lemma dict.")
 
-    logging.info("Loading captions...")
+    logger.info("Loading captions...")
     with open(coco_train_conf["captions_path"]) as f:
         caps = json.load(f)["annotations"]
-    logging.info("Done!")
+    logger.info("Done!")
 
     words = Counter()
 
@@ -98,7 +97,7 @@ def main():
     with open(words_path, "w") as f:
         json.dump(dict(words), f, indent=2)
 
-    logging.info(f"{len(words)} words saved to {words_path}!")
+    logger.info(f"{len(words)} words saved to {words_path}!")
 
 
 if __name__ == "__main__":

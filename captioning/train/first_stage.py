@@ -2,22 +2,23 @@ import json
 import os
 from contextlib import closing, redirect_stdout
 from itertools import islice
+from statistics import fmean
 
 import torch
+from nltk.translate.bleu_score import sentence_bleu
+from recordclass import recordclass
 from torch import nn
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from nltk.translate.bleu_score import sentence_bleu
-
 from tqdm.auto import tqdm, trange
 
 from ..config import (
-    device,
-    extended_word_map_path,
-    first_stage,
     coco_train_conf,
     coco_val_conf,
+    device,
     experiment_folder,
+    extended_word_map_path,
+    first_stage,
 )
 from ..dataset import CaptionHdf5Dataset, ValidationDataset
 from ..model import TermDecoder
@@ -101,6 +102,25 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
         yield model
 
 
+def precision(target, prediction):
+    """Precision = TP/(TP + FP)"""
+    tp = sum(1 for p in prediction if p in target)
+    return tp / len(prediction)
+
+
+def recall(target, prediction):
+    """Recall = TP/(TP + FN)"""
+    tp = sum(1 for p in prediction if p in target)
+    return tp / len(target)
+
+
+Score = recordclass(
+    "Score",
+    ["bleu", "avg_precision", "max_precision", "avg_recall", "max_recall"],
+    defaults=[0, 0, 0, 0, 0],
+)
+
+
 def evaluate(model, mapping):
 
     with open(os.devnull, "w") as f, redirect_stdout(f):
@@ -112,17 +132,28 @@ def evaluate(model, mapping):
     model.eval()
     model.to(device)
 
-    score = 0
+    score = Score()
 
-    for feats, targets in tqdm(islice(dataset, 1000), total=1000, desc="Evaluating"):
+    eval_size = 1000
+
+    for feats, targets in tqdm(
+        islice(dataset, eval_size), total=eval_size, desc="Evaluating"
+    ):
         feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
         prediction = prediction[1:-1]  # strip <start> and <end>
         # strip_POS_tag
         targets = list(map(lambda t: t.split(" "), targets))
-        score += sentence_bleu(targets, prediction)
 
-    score /= 1000
+        score.bleu += sentence_bleu(targets, prediction) / eval_size
+
+        p = list(precision(t, prediction) for t in targets)
+        r = list(recall(t, prediction) for t in targets)
+
+        score.avg_precision += fmean(p) / eval_size
+        score.max_precision += max(p) / eval_size
+        score.avg_recall += fmean(r) / eval_size
+        score.max_recall += max(r) / eval_size
 
     return score
 
@@ -157,12 +188,11 @@ def main():
                     trained_model.state_dict(),
                     experiment_folder / f"model_ep{(epoch + 1):03d}.pth",
                 )
-                bleu_score = evaluate(trained_model, mapping)
-                writer.add_scalar(
-                    "BLEU-score",
-                    bleu_score,
-                    (epoch + 1) * len(dataset) // first_stage["batch_size"],
-                )
+                score = evaluate(trained_model, mapping)
+                step = (epoch + 1) * len(dataset) // first_stage["batch_size"]
+
+                for name, value in score._asdict().items():
+                    writer.add_scalar(f"Score: {name}", value, step)
 
         except:  # noqa
             if get_yn_response("Remove experiment folder? [y/N]"):

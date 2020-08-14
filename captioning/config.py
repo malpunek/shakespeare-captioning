@@ -6,8 +6,8 @@ from functools import lru_cache
 from pathlib import Path
 
 import torch
-from torchvision.transforms import transforms
 from torchvision.datasets.coco import CocoCaptions
+from torchvision.transforms import transforms
 
 
 def lazy(func):

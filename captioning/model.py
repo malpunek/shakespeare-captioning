@@ -17,9 +17,8 @@ class FeatureExtractor(nn.Module):
 
 
 class TermDecoder(nn.Module):
-    """
-    Neural Network for transforming extracted image features to semantic terms.
-    """
+    """Neural Network for transforming extracted image features to semantic
+    terms."""
 
     def __init__(self, vocabulary_size, hidden_dim, encoder_dim, out_bias=None):
         super().__init__()
@@ -38,13 +37,12 @@ class TermDecoder(nn.Module):
         self.fc = nn.Linear(hidden_dim, vocabulary_size)
 
     def forward(self, encoder_out, encoded_captions, caption_lengths):
-        """
-        Forward propagation. Straight after CNN extractor.
-        Uses teacher forcing.
+        """Forward propagation. Straight after CNN extractor. Uses teacher
+        forcing.
 
         Args:
             encoder_out (Tensor): encoded images, a tensor of dimension (batch_size, encoder_dim)
-            encoded_captions (Tensor): encoded captions, a tensor of dimension (batch_size, max_caption_length)
+            encoded_captions (Tensor): encoqded captions, a tensor of dimension (batch_size, max_caption_length)
                 [with <start> token and <end> token]
             caption_lengths (Tensor): length of encoded captions without <start>, <end> (batch_size, )
         Returns:
@@ -57,7 +55,7 @@ class TermDecoder(nn.Module):
         return self.forward_hidden(hidden, encoded_captions, caption_lengths)
 
     def forward_hidden(self, hidden, encoded_captions, caption_lengths):
-        """Forward propagation with initiated hidden state"""
+        """Forward propagation with initiated hidden state."""
         target_len = encoded_captions.size(1)
         embeddings = self.embedding(
             encoded_captions
@@ -133,8 +131,155 @@ class ImgToTermNet(nn.Module):
         self.extractor = extractor or FeatureExtractor()
 
     def forward(self, img, mapping):
-        """Only for evaluation"""
+        """Only for evaluation."""
         feats = self.extractor(img)
         terms, confidence = self.term_decoder.forward_eval(feats, mapping)
         return terms, confidence
 
+
+class TermEncoder(nn.Module):
+    """Encoder part of Language Generator."""
+
+    def __init__(self, vocab_size, hidden_dim):
+        super().__init__()
+
+        self.hidden_dim = hidden_dim
+
+        self.embedding = nn.Embedding(vocab_size, hidden_dim)
+        self.emb_drop = nn.Dropout(0.2)
+
+        self.gru = nn.GRU(hidden_dim, hidden_dim / 2, bidirectional=True)
+        self.gru_out_drop = nn.Dropout(0.2)
+        self.gru_hid_drop = nn.Dropout(0.3)
+
+        hidden_init = torch.zeros(2, 1, self.hidden_dim / 2)
+        nn.init.normal_(hidden_init, mean=0, std=0.05)
+        self.hidden_init_p = torch.nn.Parameter(hidden_init)
+
+    def forward(self, encoded_terms, hidden, lengths):
+        target_len = encoded_terms.size(1)
+
+        embdeddings = self.embedding(encoded_terms)
+        embdeddings = self.emb_drop(embdeddings)
+        embdeddings = F.relu(embdeddings)
+
+        embdeddings = torch.nn.utils.rnn.pack_padded_sequence(
+            embdeddings, lengths, batch_first=True
+        )
+        out, hidden = self.gru(embdeddings, hidden)
+        out = torch.nn.utils.rnn.pad_packed_sequence(
+            out, batch_first=True, total_length=target_len
+        )
+        out = self.gru_out_drop(out)  # (seq_len, batch, num_directions * hidden_size)
+        hidden = self.gru_hid_drop(hidden)  # (num_directions, batch, hidden_size)
+
+        return out, hidden
+
+    def init_hidden(self, batch_size):
+        return self.hidden_init_p.expand(2, batch_size, self.hidden_dim).contiguous()
+
+
+class SentenceDecoderWithAttention(nn.Module):
+    """Decoder part of language generator."""
+
+    def __init__(self, vocab_size, hidden_size, output_size, out_bias):
+        super().__init__()
+        self.hidden_size = hidden_size
+        self.vocab_size = vocab_size
+
+        self.embedding = nn.Embedding(vocab_size, hidden_size)
+        self.emb_drop = nn.Dropout(0.2)
+
+        self.gru = nn.GRU(hidden_size, hidden_size, batch_first=True)
+        self.gru_drop = nn.Dropout(0.2)
+
+        self.mlp = nn.Linear(hidden_size * 2, output_size)
+        if out_bias is not None:
+            out_bias_tensor = torch.tensor(out_bias, requires_grad=False)
+            self.mlp.bias.data[:] = out_bias_tensor
+        self.logsoftmax = nn.LogSoftmax(dim=2)
+
+        self.att_mlp = nn.Linear(hidden_size, hidden_size, bias=False)
+        self.attn_softmax = nn.Softmax(dim=2)
+
+    def forward(self, input, hidden, encoder_outs, input_lengths=None):
+        """Decoding
+
+        Args:
+            input (Tensor): of shape (batch, max_seq_len)
+            hidden (Tensor): of shape (batch, hidden)
+            encoder_outs (Tensor): of shape (seq_len, batch, hidden)
+
+        Returns:
+            out: all outputs
+            hidden: last hidden state
+            attn: the attention values
+        """
+
+        target_len = input.size(1)
+
+        embeddings = self.embedding(input)  # (batch, seq_len, hidden_dim)
+        embeddings = self.emb_drop(embeddings)  # (batch, seq_len, hidden_dim)
+        embeddings = F.relu(embeddings)  # (batch, seq_len, hidden_dim)
+        embeddings = torch.nn.utils.rnn.pack_padded_sequence(
+            embeddings, input_lengths, batch_first=True
+        )  # (batch, seq_len, hidden_dim)
+
+        out, hidden = self.gru(embeddings, hidden)  # ()
+
+        out = torch.nn.utils.rnn.pad_packed_sequence(
+            out, batch_first=True, total_length=target_len
+        )  # (batch, seq_len, hidden_dim)
+
+        out_proj = self.att_mlp(out)  # (batch, seq, hidden)
+        enc_out_perm = encoder_outs.permute(0, 2, 1)  # (batch, hidden, seq)
+        e_exp = torch.bmm(out_proj, enc_out_perm)
+        attn = self.attn_softmax(e_exp)
+
+        ctx = torch.bmm(attn, encoder_outs)
+
+        full_ctx = torch.cat([self.gru_drop(out), ctx], dim=2)
+
+        out = self.mlp(full_ctx)
+        out = self.logsoftmax(out)
+        return out, hidden, attn
+
+    def forward_eval(self, encoder_out, encoder_hidden, mapping, max_len=60):
+        """Forward in eval mode (without teacher forcing)
+
+        Args:
+            encoder_out (Tensor): of size (seq_len, batch, num_directions * hidden_size)
+            encoder_hidden (Tensor): of size (num_directions, batch, hidden_size)
+            mapping (dict): mapping from idxes to words
+            max_len (int, optional): The maximum length of the generated caption.
+                Defaults to 60.
+        """
+
+        batch_size = encoder_out.size()[0]
+        assert batch_size == 1
+        encoder_out = encoder_out.reshape(1, batch_size, -1)
+
+        start = mapping["<start>"]
+
+        words_decoded = [start]
+        confidence = [1]
+
+        device = list(self.parameters())[0].device
+
+        last_word_decoded = torch.tensor([start]).reshape((1, 1)).to(device=device)
+        cap_len = torch.tensor([1]).to(device=device, dtype=torch.long)
+
+        for _ in range(1, max_len + 1):
+            out_dec, encoder_hidden, attn = self(
+                last_word_decoded, encoder_hidden, encoder_out, inpput_lengths=cap_len
+            )
+
+            topv, topi = out_dec.topk(1)  # (batch_size, 1, 1)
+            topv, topi = out_dec.topk(1)  # (batch_size, 1, 1)
+            words_decoded.append(topi.item())
+            confidence.append(torch.exp(topv).item())
+            if topi.item() == mapping["<end>"]:
+                break
+            last_word_decoded = topi.reshape((1, 1)).detach()
+
+        return list(mapping.decode(words_decoded)), confidence

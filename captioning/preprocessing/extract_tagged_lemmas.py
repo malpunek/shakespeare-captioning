@@ -1,5 +1,6 @@
 # %%
 import json
+import re
 from collections import Counter
 from multiprocessing import Pool
 from operator import itemgetter
@@ -29,13 +30,14 @@ POS_OUT = [
     "PART",
     "X",
     "AUX",
-    # TODO should we keep PROPNS
-    "PROPN",
 ]
 
 POS_IN = [
+    # TODO should we keep PROPNS
+    # YES - with a tag they provide a lot of semantic
     "NOUN",
     "VERB",
+    "PROPN",
 ]
 
 
@@ -58,6 +60,7 @@ class TaggerFilterLemmatizer:
     def caption_to_tagged_lemmas(self, caption: str) -> Iterable[str]:
         nlp = load_nlp()
         caption = contractions.fix(caption)
+        caption = re.sub(r"\W+", " ", caption)
         tokens = nlp(caption)
         # A. Filtering non-semantic words
         tokens = filter(self.non_semantic_word_filter, tokens)

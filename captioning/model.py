@@ -1,8 +1,8 @@
 import torch
 import torch.nn.functional as F
 from torch import nn
-from torchvision.models import resnet101
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from torchvision.models import resnet101
 
 
 class FeatureExtractor(nn.Module):
@@ -144,15 +144,16 @@ class TermEncoder(nn.Module):
         super().__init__()
 
         self.hidden_dim = hidden_dim
+        assert hidden_dim % 2 == 0
 
         self.embedding = nn.Embedding(vocab_size, hidden_dim)
         self.emb_drop = nn.Dropout(0.2)
 
-        self.gru = nn.GRU(hidden_dim, hidden_dim / 2, bidirectional=True)
+        self.gru = nn.GRU(hidden_dim, hidden_dim // 2, bidirectional=True)
         self.gru_out_drop = nn.Dropout(0.2)
         self.gru_hid_drop = nn.Dropout(0.3)
 
-        hidden_init = torch.zeros(2, 1, self.hidden_dim / 2)
+        hidden_init = torch.zeros(2, 1, self.hidden_dim // 2)
         nn.init.normal_(hidden_init, mean=0, std=0.05)
         self.hidden_init_p = torch.nn.Parameter(hidden_init)
 
@@ -164,25 +165,27 @@ class TermEncoder(nn.Module):
         embdeddings = F.relu(embdeddings)
 
         embdeddings = torch.nn.utils.rnn.pack_padded_sequence(
-            embdeddings, lengths, batch_first=True
+            embdeddings, lengths, batch_first=True, enforce_sorted=False
         )
         out, hidden = self.gru(embdeddings, hidden)
-        out = torch.nn.utils.rnn.pad_packed_sequence(
+        out, lens = torch.nn.utils.rnn.pad_packed_sequence(
             out, batch_first=True, total_length=target_len
         )
         out = self.gru_out_drop(out)  # (seq_len, batch, num_directions * hidden_size)
         hidden = self.gru_hid_drop(hidden)  # (num_directions, batch, hidden_size)
 
-        return out, hidden
+        return out, hidden, lens
 
     def init_hidden(self, batch_size):
-        return self.hidden_init_p.expand(2, batch_size, self.hidden_dim).contiguous()
+        return self.hidden_init_p.expand(
+            2, batch_size, self.hidden_dim // 2
+        ).contiguous()
 
 
 class SentenceDecoderWithAttention(nn.Module):
     """Decoder part of language generator."""
 
-    def __init__(self, vocab_size, hidden_size, output_size, out_bias):
+    def __init__(self, vocab_size, hidden_size, output_size, out_bias=None):
         super().__init__()
         self.hidden_size = hidden_size
         self.vocab_size = vocab_size
@@ -208,7 +211,7 @@ class SentenceDecoderWithAttention(nn.Module):
         Args:
             input (Tensor): of shape (batch, max_seq_len)
             hidden (Tensor): of shape (batch, hidden)
-            encoder_outs (Tensor): of shape (seq_len, batch, hidden)
+            encoder_outs (Tensor): of shape (batch, seq, hidden)
 
         Returns:
             out: all outputs
@@ -222,12 +225,12 @@ class SentenceDecoderWithAttention(nn.Module):
         embeddings = self.emb_drop(embeddings)  # (batch, seq_len, hidden_dim)
         embeddings = F.relu(embeddings)  # (batch, seq_len, hidden_dim)
         embeddings = torch.nn.utils.rnn.pack_padded_sequence(
-            embeddings, input_lengths, batch_first=True
+            embeddings, input_lengths, batch_first=True, enforce_sorted=False
         )  # (batch, seq_len, hidden_dim)
 
         out, hidden = self.gru(embeddings, hidden)  # ()
 
-        out = torch.nn.utils.rnn.pad_packed_sequence(
+        out, _ = torch.nn.utils.rnn.pad_packed_sequence(
             out, batch_first=True, total_length=target_len
         )  # (batch, seq_len, hidden_dim)
 
@@ -248,16 +251,15 @@ class SentenceDecoderWithAttention(nn.Module):
         """Forward in eval mode (without teacher forcing)
 
         Args:
-            encoder_out (Tensor): of size (seq_len, batch, num_directions * hidden_size)
+            encoder_out (Tensor): of size (batch, seq, num_directions * hidden_size)
             encoder_hidden (Tensor): of size (num_directions, batch, hidden_size)
             mapping (dict): mapping from idxes to words
             max_len (int, optional): The maximum length of the generated caption.
                 Defaults to 60.
         """
 
-        batch_size = encoder_out.size()[0]
+        batch_size = encoder_out.size(0)
         assert batch_size == 1
-        encoder_out = encoder_out.reshape(1, batch_size, -1)
 
         start = mapping["<start>"]
 
@@ -271,7 +273,7 @@ class SentenceDecoderWithAttention(nn.Module):
 
         for _ in range(1, max_len + 1):
             out_dec, encoder_hidden, attn = self(
-                last_word_decoded, encoder_hidden, encoder_out, inpput_lengths=cap_len
+                last_word_decoded, encoder_hidden, encoder_out, input_lengths=cap_len
             )
 
             topv, topi = out_dec.topk(1)  # (batch_size, 1, 1)
@@ -283,3 +285,25 @@ class SentenceDecoderWithAttention(nn.Module):
             last_word_decoded = topi.reshape((1, 1)).detach()
 
         return list(mapping.decode(words_decoded)), confidence
+
+
+class LanguageGenerator(nn.Module):
+    def __init__(self, enc, dec):
+        super().__init__()
+        self.enc = enc
+        self.dec = dec
+
+    def forward(self, terms, terms_lengths, encoded_captions, encoded_lengths):
+        out, hidden, lens = self.enc(
+            terms, self.enc.init_hidden(terms.size(0)), terms_lengths
+        )
+        hidden = torch.cat([hidden[0, :, :], hidden[1, :, :]], dim=1).unsqueeze(0)
+        return self.dec(encoded_captions, hidden, out, encoded_lengths)
+
+    def forward_eval(self, terms, terms_lengths, mapping):
+        out, hidden, out_len = self.enc(
+            terms, self.enc.init_hidden(terms.size(0)), terms_lengths
+        )
+        hidden = torch.cat([hidden[0, :, :], hidden[1, :, :]], dim=1).unsqueeze(0)
+        out = out[:, : out_len.item(), :]
+        return self.dec.forward_eval(out, hidden, mapping)

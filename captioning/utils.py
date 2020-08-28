@@ -1,5 +1,8 @@
 from itertools import chain
+from math import prod
 from pathlib import Path
+
+import torch
 
 from .config import interactive
 
@@ -36,23 +39,38 @@ def ask_overwrite(path: str) -> bool:
 
 
 class WordIdxMap:
-    def __init__(self, word_map):
+    def __init__(self, words):
+        if isinstance(words, dict):
+            words = words.keys()
+
         self.idx2word = list(
             # We want <pad> to be indexed as 0
-            chain(["<pad>"], word_map.keys(), ["<unk>", "<start>", "<end>"])
+            chain(["<pad>"], words, ["<unk>", "<start>", "<end>"])
         )
         self.word2idx = {w: i for i, w in enumerate(self.idx2word)}
 
     def __getitem__(self, x):
+        if isinstance(x, torch.Tensor) and prod(x.size()) == 1:
+            x = x.item()
         if isinstance(x, int):
             return self.idx2word[x]
-        else:
-            if (mapping := self.word2idx.get(x, None)) is not None:
-                return mapping
-            return self.word2idx["<unk>"]
+        return self.word2idx.get(x, self.word2idx["<unk>"])
+
+    def __len__(self):
+        return len(self.idx2word)
 
     def encode(self, words):
         return (self[w] for w in words)
 
     def decode(self, encoded_caption):
         return (self[idx] for idx in encoded_caption)
+
+    def prepare_for_training(self, words, max_caption_len, terms=False):
+        words = words[: max_caption_len - 2]
+        # Dont surround with start end if in terms mode
+        start = (self["<start>"],) if not terms else tuple()
+        end = (self["<end>"],) if not terms else (self["<pad>"], self["<pad>"])
+        pad = (self["<pad>"] for _ in range(max_caption_len - 2 - len(words)))
+        term_len = (len(words),)
+        words = chain(start, self.encode(words), end, pad, term_len)
+        return list(words)

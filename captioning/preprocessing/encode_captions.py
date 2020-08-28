@@ -1,6 +1,5 @@
 import json
 from functools import partial
-from itertools import chain
 from pathlib import Path
 
 from tqdm.auto import tqdm
@@ -15,20 +14,11 @@ from ..config import (
 from ..utils import WordIdxMap, ask_overwrite
 
 
-def encode_caption(mapping, caption):
-    terms = caption.split()
-    terms = terms[: max_caption_len - 2]
-    start = (mapping["<start>"],)
-    end = (mapping["<end>"],)
-    pad = (mapping["<pad>"] for _ in range(max_caption_len - 2 - len(terms)))
-    term_len = (len(terms),)
-    terms = chain(start, mapping.encode(terms), end, pad, term_len)
-    return list(terms)
-
-
 def map_annotation_using_mapping(mapping, ann):
     res = ann.copy()
-    res["caption"] = encode_caption(mapping, res["caption"])
+    res["caption"] = mapping.prepare_for_training(
+        res["caption"].split(), max_caption_len
+    )
     return res
 
 

@@ -29,7 +29,7 @@ def main():
         word_map = json.load(f)
 
     mapping = WordIdxMap(word_map)
-    vocab_size = len(word_map) + 4  # <start>, <unk>, <pad>, <end>
+    vocab_size = len(mapping)
 
     dec = TermDecoder(vocab_size, 2048, 2048)
     dec.load_state_dict(torch.load(last_checkpoint_path(), map_location="cpu"))

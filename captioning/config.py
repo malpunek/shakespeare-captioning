@@ -65,6 +65,8 @@ coco_val_conf = {
 words_path = computed_root_path / "words.json"
 word_map_path = thresh_path / "word_map.json"
 extended_word_map_path = thresh_path / "word_map_extended.json"
+language_data_path = computed_root_path / "language_data.pkl"
+
 
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"

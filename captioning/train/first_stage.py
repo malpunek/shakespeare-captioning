@@ -170,7 +170,7 @@ def main():
 
     writer = SummaryWriter(experiment_folder)
 
-    vocab_size = len(word_map) + 4  # <start>, <unk>, <pad>, <end>
+    vocab_size = len(mapping)
     # TODO: config
     model = TermDecoder(vocab_size, 2048, 2048)
 

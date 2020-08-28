@@ -28,6 +28,7 @@ device_str = "cpu" if not torch.cuda.is_available() else f"cuda:{gpu_num}"
 device = torch.device(device_str)
 
 first_stage = {"batch_size": 16, "learning_rate": 0.001, "epochs": 10}
+second_stage = {"batch_size": 32, "learning_rate": 0.001, "epochs": 30}
 experiment_folder = Path(f"runs/exp_{args.experiment:03d}")
 
 max_caption_len = 20

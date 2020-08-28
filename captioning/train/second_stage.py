@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..config import device, language_data_path, experiment_folder
+from ..config import device, experiment_folder, language_data_path, second_stage
 from ..dataset import BalancedLanguageDataset
 from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
 from .first_stage import extract_caption_len
@@ -21,7 +21,9 @@ def filter_coco(coco_caps):
 
 def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
-    dataloader = DataLoader(dataset, batch_size=2, num_workers=1, shuffle=True)
+    dataloader = DataLoader(
+        dataset, batch_size=second_stage["batch_size"], num_workers=8, shuffle=True
+    )
 
     model = model.train().to(device)
     running_loss = 0
@@ -51,6 +53,7 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
     return model
 
+
 def main():
     dataset = BalancedLanguageDataset(
         language_data_path,
@@ -68,11 +71,12 @@ def main():
     lang = LanguageGenerator(enc, dec)
 
     criterion = nn.NLLLoss(ignore_index=0)
-    optimizer = torch.optim.Adam(lang.parameters(), lr=0.001)
+    optimizer = torch.optim.Adam(lang.parameters(), lr=second_stage["learning_rate"])
 
-    for i in range(50):
+    for i in range(second_stage["epochs"]):
         print(f"Epoch {i}")
-        train(lang, dataset, cmapping, criterion, optimizer, writer, i)
+        lang = train(lang, dataset, cmapping, criterion, optimizer, writer, i)
+        torch.save(lang.state_dict(), experiment_folder / f"language_ep{i:03d}.pth")
 
 
 if __name__ == "__main__":

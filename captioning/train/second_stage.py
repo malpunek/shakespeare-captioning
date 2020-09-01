@@ -11,6 +11,10 @@ from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
 from .first_stage import extract_caption_len
 
 
+# https://github.com/pytorch/pytorch/issues/973
+torch.multiprocessing.set_sharing_strategy("file_system")
+
+
 def filter_shake(shake_captions):
     return list(filter(lambda x: len(x[-1]) > 2, shake_captions))
 

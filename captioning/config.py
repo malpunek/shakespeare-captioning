@@ -86,8 +86,10 @@ logger.setLevel(logging.DEBUG)
 logger.addHandler(_handler)
 
 
-def last_checkpoint_path():
-    return sorted(experiment_folder.glob("*.pth"))[-1]
+def last_checkpoint_path(stage=1):
+    assert stage in (1, 2)
+    stage = "model" if stage == 1 else "lang"
+    return sorted(experiment_folder.glob(f"{stage}*.pth"))[-1]
 
 
 def setup_nltk():

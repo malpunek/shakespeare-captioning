@@ -41,10 +41,12 @@ class TermDecoder(nn.Module):
         forcing.
 
         Args:
-            encoder_out (Tensor): encoded images, a tensor of dimension (batch_size, encoder_dim)
-            encoded_captions (Tensor): encoqded captions, a tensor of dimension (batch_size, max_caption_length)
-                [with <start> token and <end> token]
-            caption_lengths (Tensor): length of encoded captions without <start>, <end> (batch_size, )
+            encoder_out (Tensor): encoded images, a tensor of dimension (batch_size,
+                encoder_dim)
+            encoded_captions (Tensor): encoqded captions, a tensor of dimension
+                (batch_size, max_caption_length) [with <start> token and <end> token]
+            caption_lengths (Tensor): length of encoded captions without <start>, <end>
+                of dimension (batch_size, )
         Returns:
             tuple(Tensor, Tensor) scores for vocabulary
         """
@@ -307,3 +309,29 @@ class LanguageGenerator(nn.Module):
         hidden = torch.cat([hidden[0, :, :], hidden[1, :, :]], dim=1).unsqueeze(0)
         out = out[:, : out_len.item(), :]
         return self.dec.forward_eval(out, hidden, mapping)
+
+
+# TODO avoid duplication
+def extract_caption_len(captions):
+    captions_lens = captions[:, -1]
+    captions = captions[:, :-1]
+    return captions, captions_lens
+
+
+class SemStyle(nn.Module):
+    def __init__(self, img_to_term, language_generator, mmap, tmap, cmap):
+        super().__init__()
+        self.img_to_term = img_to_term
+        self.language_generator = language_generator
+        self.mmap = mmap
+        self.tmap = tmap
+        self.cmap = cmap
+
+    def forward(self, img):
+        terms, _ = self.img_to_term(img, self.mmap)
+        terms = terms[1:-1]
+        print(terms)
+        terms = self.tmap.prepare_for_training(terms, max_caption_len=20, terms=True)
+        terms = torch.LongTensor(terms).unsqueeze(0)
+        terms, tlens = extract_caption_len(terms)
+        return self.language_generator.forward_eval(terms, tlens, self.cmap)

@@ -12,7 +12,7 @@ from .first_stage import extract_caption_len
 
 
 # https://github.com/pytorch/pytorch/issues/973
-torch.multiprocessing.set_sharing_strategy("file_system")
+# torch.multiprocessing.set_sharing_strategy("file_system")
 
 
 def filter_shake(shake_captions):
@@ -26,7 +26,7 @@ def filter_coco(coco_caps):
 def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
     dataloader = DataLoader(
-        dataset, batch_size=second_stage["batch_size"], num_workers=8, shuffle=True
+        dataset, batch_size=second_stage["batch_size"], num_workers=4, shuffle=True
     )
 
     model = model.train().to(device)
@@ -34,16 +34,17 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
     for i, data in enumerate(tqdm(dataloader, desc="Batches")):
 
         caps, terms = data
-        # caps, terms = next(iter(dataloader))
         caps, terms = torch.stack(caps).to(device), torch.stack(terms).to(device)
         caps, clens = extract_caption_len(caps.T)
         terms, tlens = extract_caption_len(terms.T)
 
-        targets = caps.detach().clone()
+        targets = caps.detach().clone()[:, 1:]
 
         optimizer.zero_grad()
 
-        out, hidden, attn = model(terms, tlens, caps.detach().clone(), clens + 1)
+        out, hidden, attn = model(
+            terms, tlens, caps.detach().clone()[:, :-1], clens + 1
+        )
         loss = criterion(out.permute(0, 2, 1), targets)
         loss.backward()
         optimizer.step()

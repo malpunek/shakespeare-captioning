@@ -3,3 +3,6 @@
 .ipynb_checkpoints
 __pycache__
 runs
+
+random_imgs
+mini_val

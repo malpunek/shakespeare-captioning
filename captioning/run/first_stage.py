@@ -14,13 +14,15 @@ from ..model import ImgToTermNet, TermDecoder
 from ..utils import WordIdxMap
 
 
+def get_image(img_path):
+    img = Image.open(img_path)
+    img = image_transform(img)
+    return img.to(device).unsqueeze(0)
+
+
 def run_path(model, mapping, img_path):
     with torch.no_grad():
-        img = Image.open(img_path)
-        img = image_transform(img)
-        img = img.to(device).unsqueeze(0)
-
-        terms, _ = model(img, mapping)
+        terms, _ = model(get_image(img_path), mapping)
         return terms
 
 

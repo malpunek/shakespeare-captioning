@@ -1,12 +1,11 @@
+from pathlib import Path
 import json
 
 import torch
-from PIL import Image
 
 from ..config import (
     device,
     extended_word_map_path,
-    image_transform,
     language_data_path,
     last_checkpoint_path,
 )
@@ -21,16 +20,7 @@ from ..model import (
 )
 from ..train.second_stage import filter_coco, filter_shake
 from ..utils import WordIdxMap
-
-
-def run_path(model, mapping, img_path):
-    with torch.no_grad():
-        img = Image.open(img_path)
-        img = image_transform(img)
-        img = img.to(device).unsqueeze(0)
-
-        terms, _ = model(img, mapping)
-        return terms
+from .first_stage import get_image
 
 
 def get_mappings():
@@ -67,23 +57,42 @@ def get_models(mapping, cmapping, tmapping):
     return first_stage, lang
 
 
-def main():
+def main(img_dir):
 
+    img_dir = Path(img_dir).expanduser()
+    if not img_dir.is_dir():
+        raise RuntimeError(f"{str(img_dir)} is not a directory!")
     mmap, cmap, tmap = get_mappings()
     term_gen, lang_gen = get_models(mmap, cmap, tmap)
 
     model = SemStyle(term_gen, lang_gen, mmap, tmap, cmap)
     model.eval()
 
-    # TODO
-    img_path = "/home/malpunek/Downloads/mini_val/COCO_val2014_000000000164.jpg"
+    for sub_path in sorted(img_dir.iterdir()):
+        if sub_path.suffix not in (".jpg", ".png"):
+            continue
+        terms, cap, _ = model(get_image(sub_path))
+        _, scap, _ = model(get_image(sub_path), True)
 
-    img = Image.open(img_path)
-    img = image_transform(img)
-    img = img.to(device).unsqueeze(0)
-
-    print(model(img))
+        print(f"![Sample image](https://students.mimuw.edu.pl/~sm371229/{sub_path})")
+        for meat in (
+            terms,
+            "Normal: " + " ".join(cap[1:-1]),
+            "Styled: " + " ".join(scap[1:-1]),
+        ):
+            print("-" * 20)
+            print(meat)
+        print("-" * 20)
+        print("\n\n")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    import select
+
+    print(f"Evaluating {last_checkpoint_path(2)}")
+
+    print("Provide img dir\n\n")
+    i, _, _ = select.select([sys.stdin], [], [], 15)
+    img_dir = sys.stdin.readline().strip() if i else "mini_val"
+    main(img_dir)

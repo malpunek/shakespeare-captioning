@@ -43,7 +43,7 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
         optimizer.zero_grad()
 
         out, hidden, attn = model(
-            terms, tlens, caps.detach().clone()[:, :-1], clens + 1
+            terms, tlens, caps[:, :-1], clens + 1  # add <start>
         )
         loss = criterion(out.permute(0, 2, 1), targets)
         loss.backward()

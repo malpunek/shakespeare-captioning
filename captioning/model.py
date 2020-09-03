@@ -216,7 +216,7 @@ class SentenceDecoderWithAttention(nn.Module):
             encoder_outs (Tensor): of shape (batch, seq, hidden)
 
         Returns:
-            out: all outputs
+            out: all outputs (batch, output)
             hidden: last hidden state
             attn: the attention values
         """
@@ -327,11 +327,13 @@ class SemStyle(nn.Module):
         self.tmap = tmap
         self.cmap = cmap
 
-    def forward(self, img):
+    def forward(self, img, style=False):
         terms, _ = self.img_to_term(img, self.mmap)
         terms = terms[1:-1]
-        print(terms)
+        if style:
+            terms = terms + ["<style>"]
+        orig_terms = list(terms)
         terms = self.tmap.prepare_for_training(terms, max_caption_len=20, terms=True)
         terms = torch.LongTensor(terms).unsqueeze(0)
         terms, tlens = extract_caption_len(terms)
-        return self.language_generator.forward_eval(terms, tlens, self.cmap)
+        return orig_terms, *self.language_generator.forward_eval(terms, tlens, self.cmap)

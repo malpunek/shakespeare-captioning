@@ -1,7 +1,7 @@
 import json
+import logging
 import string
-from collections import Counter
-from itertools import chain
+from itertools import chain, groupby
 from operator import itemgetter
 
 import contractions
@@ -143,29 +143,20 @@ def match(file_conll, file_in, file_out):
 
     lines = map(str.strip, lines)
     frames = list(split_on_empty(lines))  # [f1, f1, f1, f2, f5, f5]
+    groups = groupby(frames, key=itemgetter(0))
 
-    sentences = [f[0] for f in frames]
+    sent_to_terms = {
+        sent: extract_terms(list(frame_grp))
+        for sent, frame_grp in tqdm(groups, desc="Matching..")
+    }
 
-    sentences = Counter(sentences)  # [sent1: 3, sent2: 1, sent5: 2]
-    sent_list = list(sentences)  # [sent1, sent2, sent5]
-
-    caps_with_frames = []
-    frame_idx = sentence_idx = 0
-
-    for i, cap in enumerate(tqdm(captions, desc="Matching..")):
-        current_sentence = sent_list[sentence_idx]
-
-        if current_sentence == cap["caption"]:
-            matches_len = sentences[current_sentence]
-            terms = extract_terms(frames[frame_idx : frame_idx + matches_len])
-
-            caps_with_frames.append({**cap, "terms": terms})
-            sentence_idx += 1
-            frame_idx += matches_len
-        else:
-            caps_with_frames.append({**cap, "terms": []})
+    caps_with_frames = [
+        {**cap, "terms": sent_to_terms.get(cap["caption"], [])}
+        for cap in tqdm(captions, desc="Transforming..")
+    ]
 
     with open(file_out, "wt") as f:
+        logging.info(f"Saving {file_out}..")
         json.dump(caps_with_frames, f, indent=2)
 
 

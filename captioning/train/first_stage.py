@@ -123,12 +123,16 @@ Score = recordclass(
 
 def evaluate(model, mapping):
 
-    dataset = QuickCocoDataset(
-        coco_val_conf["features"],
-        coco_val_conf["final"],
-        shakespare_conf["final"],
-        encode=False,
-    )
+    if not hasattr(evaluate, "dataset"):
+        evaluate.dataset = QuickCocoDataset(
+            coco_val_conf["features"],
+            coco_train_conf["final"],
+            shakespare_conf["final"],
+            encode=False,
+            val_final_file=coco_val_conf["final"]
+        )
+    else:
+        evaluate.dataset.open_feats()
 
     model.eval()
     model.to(device)
@@ -138,7 +142,7 @@ def evaluate(model, mapping):
     eval_size = 1000
 
     for feats, targets in tqdm(
-        islice(dataset, eval_size), total=eval_size, desc="Evaluating"
+        islice(evaluate.dataset, eval_size), total=eval_size, desc="Evaluating"
     ):
         feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
@@ -156,7 +160,7 @@ def evaluate(model, mapping):
         score.avg_recall += fmean(r) / eval_size
         score.max_recall += max(r) / eval_size
 
-    dataset.close()
+    evaluate.dataset.close()
     return score
 
 

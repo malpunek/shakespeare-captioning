@@ -30,13 +30,13 @@ def populate_file(f, dataset):
 
 
 def extract(dataset, conf):
-    if not ask_overwrite(conf["features_path"]):
+    if not ask_overwrite(conf["features"]):
         return
 
-    hdf5_fname = Path(conf["features_path"])
+    hdf5_fname = Path(conf["features"])
     hdf5_fname.unlink(missing_ok=True)
 
-    with h5py.File(conf["features_path"], "w") as f:
+    with h5py.File(conf["features"], "w") as f:
         populate_file(f, dataset)
 
 

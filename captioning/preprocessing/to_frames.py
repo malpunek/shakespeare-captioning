@@ -3,7 +3,6 @@ import string
 from collections import Counter
 from itertools import chain
 from operator import itemgetter
-from pathlib import Path
 
 import contractions
 from tqdm.auto import tqdm
@@ -14,6 +13,7 @@ from ..config import (
     get_zipped_plays_paths,
     shakespare_conf,
 )
+from ..utils import ask_overwrite
 
 
 def cap_to_ascii(cap):
@@ -23,7 +23,7 @@ def cap_to_ascii(cap):
 
 
 def make_coco_basic(in_path, out_path):
-    if Path(out_path).exists():
+    if not ask_overwrite(out_path):
         return
 
     with open(in_path) as f:
@@ -42,7 +42,7 @@ def make_coco_basic(in_path, out_path):
 
 
 def make_shake_basic(out_path):
-    if Path(out_path).exists():
+    if not ask_overwrite(out_path):
         return
 
     modern_lines, old_lines = [], []
@@ -76,7 +76,7 @@ def make_shake_basic(out_path):
 
 def to_txt(file_in, file_out):
 
-    if Path(file_out).exists():
+    if not ask_overwrite(file_out):
         return
 
     with open(file_in) as f:
@@ -124,6 +124,9 @@ def extract_terms(all_frames):
 
 
 def match(file_conll, file_in, file_out):
+    if not ask_overwrite(file_out):
+        return
+
     try:
         with open(file_conll) as f:
             lines = list(f)

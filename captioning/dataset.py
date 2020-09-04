@@ -151,31 +151,41 @@ class BalancedLanguageDataset(LanguageDataset):
 
 
 class QuickCocoDataset(SemStyleDataset):
-    def __init__(self, features_file, *args, encode=True, **kwargs):
+    def __init__(self, features_file, *args, encode=True, val_final_file=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.encode = encode
-        self.features_file = h5py.File(features_file, "r", driver="core")
+        if val_final_file is not None:
+            with open(val_final_file) as vf:
+                self.source = json.load(vf)
+        else:
+            self.source = self.coco
+
+        self.features_path = features_file
+        self.features_file = h5py.File(self.features_path, "r", driver="core")
 
         self.features = self.features_file["features"]
         self.feat_ids = self.features_file["ids"]
         self.id2idx = {img_id: idx for idx, img_id in enumerate(self.feat_ids)}
 
         self.coco_terms_enc = self._encode_caps(
-            self.coco, self.get_term_mapping, "terms", max_len=20
+            self.source, self.get_term_mapping, "terms", max_len=20
         )  # Treat as normal caption: we want <start> and <end>
 
     def __len__(self):
-        return len(self.coco)
+        return len(self.source)
 
     def __getitem__(self, idx):
-        feat_id = self.coco[idx]["img_id"]
+        feat_id = self.source[idx]["img_id"]
         feat_idx = self.id2idx[feat_id]
         terms = (
             torch.LongTensor(self.coco_terms_enc[idx])
             if self.encode
-            else ["<start>"] + self.coco[idx]["terms"] + ["<end>"]
+            else ["<start>"] + self.source[idx]["terms"] + ["<end>"]
         )
         return self.features[feat_idx], terms
+
+    def open_feats(self):
+        self.features_file = h5py.File(self.features_path, "r", driver="core")
 
     def close(self):
         self.features_file.close()

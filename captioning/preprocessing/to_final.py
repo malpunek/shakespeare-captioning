@@ -5,8 +5,10 @@ from itertools import chain
 from operator import itemgetter
 
 import networkx as nx
+from tqdm.auto import tqdm
 
-from ..config import coco_train_conf, load_framenet, shakespare_conf
+from ..config import coco_train_conf, coco_val_conf, load_framenet, shakespare_conf
+from ..utils import ask_overwrite
 
 fn = load_framenet()
 
@@ -98,46 +100,43 @@ def new_terms(fmap, terms):
     return [(term if term not in fmap else fmap[term]) for term in terms]
 
 
-def reduce_frames(coco_frame_path, shake_frame_path):
+def reduce_frames(frame_path, out_path, fmap):
+    if not ask_overwrite(out_path):
+        return
 
-    with open(coco_frame_path) as cf, open(shake_frame_path) as sf:
-        coco = json.load(cf)
-        shake = json.load(sf)
+    with open(frame_path) as f:
+        anns = json.load(f)
 
-    coco_frames = extract_frames(coco)  # ["Placing", "Entity"...]
-
-    fmap = get_frame_mapping(coco_frames)
-    fmap = {f"{key}_FRAME": f"{val}_FRAME" for key, val in fmap.items()}
-
-    coco = [
+    new_anns = [
         {
-            **cap,
-            "caption_words": to_words(cap["caption"]),
-            "terms": new_terms(fmap, cap["terms"]),
+            **ann,
+            "caption_words": to_words(ann["caption"]),
+            "terms": new_terms(fmap, ann["terms"]),
         }
-        for cap in coco
+        for ann in anns
     ]
 
-    shake = [
-        {
-            **cap,
-            "caption_words": to_words(cap["caption"]),
-            "terms": new_terms(fmap, cap["terms"]),
-            "original_words": to_words(cap["original"]),
-        }
-        for cap in shake
-    ]
+    if len(new_anns) > 0 and "original" in new_anns[0]:
+        new_anns = [
+            {**ann, "original_words": to_words(ann["original"])} for ann in new_anns
+        ]
 
-    return coco, shake
+    with open(out_path, "wt") as f:
+        json.dump(new_anns, f, indent=2)
 
 
 def main():
-    coco, shake = reduce_frames(coco_train_conf["frames"], shakespare_conf["frames"])
-    with open(coco_train_conf["final"], "wt") as cf, open(
-        shakespare_conf["final"], "wt"
-    ) as sf:
-        json.dump(coco, cf, indent=2)
-        json.dump(shake, sf, indent=2)
+    with open(coco_train_conf["frames"]) as cf:
+        coco = json.load(cf)
+
+    fmap = get_frame_mapping(extract_frames(coco))
+    fmap = {f"{key}_FRAME": f"{val}_FRAME" for key, val in fmap.items()}
+
+    for conf in tqdm(
+        (coco_train_conf, coco_val_conf, shakespare_conf),
+        desc="Mapping to reduced frame vocabulary",
+    ):
+        reduce_frames(conf["frames"], conf["final"], fmap)
 
 
 if __name__ == "__main__":

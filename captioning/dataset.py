@@ -186,6 +186,8 @@ class QuickCocoDataset(SemStyleDataset):
 
     def open_feats(self):
         self.features_file = h5py.File(self.features_path, "r", driver="core")
+        self.features = self.features_file["features"]
+        self.feat_ids = self.features_file["ids"]
 
     def close(self):
         self.features_file.close()

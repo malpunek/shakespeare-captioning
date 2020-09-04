@@ -150,9 +150,7 @@ def evaluate(model, mapping):
     ):
         feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
-        prediction = prediction[1:-1]  # strip <start> and <end>
-        # strip_POS_tag
-        targets = list(map(lambda t: t.split(" "), targets))
+        prediction, targets = prediction[1:-1], targets[1:-1]  # strip <start> and <end>
 
         score.bleu += sentence_bleu(targets, prediction) / eval_size
 

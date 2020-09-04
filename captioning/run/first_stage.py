@@ -6,10 +6,12 @@ from PIL import Image
 
 from ..config import (
     device,
-    extended_word_map_path,
     image_transform,
     last_checkpoint_path,
+    coco_train_conf,
+    shakespare_conf,
 )
+from ..dataset import SemStyleDataset
 from ..model import ImgToTermNet, TermDecoder
 from ..utils import WordIdxMap
 
@@ -27,10 +29,10 @@ def run_path(model, mapping, img_path):
 
 
 def main():
-    with open(extended_word_map_path) as f:
-        word_map = json.load(f)
 
-    mapping = WordIdxMap(word_map)
+    mapping = SemStyleDataset(
+        coco_train_conf["final"], shakespare_conf["final"]
+    ).get_term_mapping
     vocab_size = len(mapping)
 
     dec = TermDecoder(vocab_size, 2048, 2048)

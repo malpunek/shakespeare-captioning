@@ -1,14 +1,11 @@
-import os
-import pickle
+import json
 import sys
 from collections import Counter
 from functools import cached_property
-import json
 from itertools import chain
 
 import h5py
-import numpy as np
-from PIL import Image
+import torch
 from torch.utils.data import Dataset
 from tqdm.auto import tqdm
 
@@ -51,7 +48,7 @@ class SemStyleDataset(Dataset):
         for cap in tqdm(
             chain(self.coco, self.shake), total=total, desc="Calculating term mapping",
         ):
-            terms_vocab.update(cap["terns"])
+            terms_vocab.update(cap["terms"])
 
         return WordIdxMap(terms_vocab)
 
@@ -62,12 +59,10 @@ class SemStyleDataset(Dataset):
         ]
 
     def _encode_terms(self, iterable, mapping, style, max_len=20):
-        if style:
-            for it in iterable:
-                it["terms"] = list(it["terms"]) + [style]
+        style = [style] if style else []
         return [
             mapping.prepare_for_training(
-                it["terms"], max_caption_len=max_len, terms=True
+                it["terms"] + style, max_caption_len=max_len, terms=True
             )
             for it in iterable
         ]
@@ -79,13 +74,13 @@ class LanguageDataset(SemStyleDataset):
         self.encode = encode
 
         # Captions
-        self.coco_caps_enc = self._encode_all(
+        self.coco_caps_enc = self._encode_caps(
             self.coco, self.get_cap_mapping, "caption_words"
         )
-        self.shake_modern_enc = self._encode_all(
+        self.shake_modern_enc = self._encode_caps(
             self.shake, self.get_cap_mapping, "caption_words"
         )
-        self.shake_orig_enc = self._encode_all(
+        self.shake_orig_enc = self._encode_caps(
             self.shake, self.get_cap_mapping, "original_words"
         )
 
@@ -95,10 +90,10 @@ class LanguageDataset(SemStyleDataset):
         )
 
         self.shake_modern_terms_enc = self._encode_terms(
-            self.coco, self.get_term_mapping, "<shake_modern>", max_len=20
+            self.shake, self.get_term_mapping, "<shake_modern>", max_len=20
         )
         self.shake_orig_terms_enc = self._encode_terms(
-            self.coco, self.get_term_mapping, "<shake_orig>", max_len=20
+            self.shake, self.get_term_mapping, "<shake_orig>", max_len=20
         )
 
     def get_coco(self, idx):
@@ -152,20 +147,21 @@ class BalancedLanguageDataset(LanguageDataset):
         raise IndexError
 
     def __len__(self):
-        return 3 * len(self.coco_merged)
+        return 3 * len(self.coco)
 
 
 class QuickCocoDataset(SemStyleDataset):
-    def __init__(self, features_file, *args, **kwargs):
+    def __init__(self, features_file, *args, encode=True, **kwargs):
         super().__init__(*args, **kwargs)
+        self.encode = encode
         self.features_file = h5py.File(features_file, "r", driver="core")
 
         self.features = self.features_file["features"]
         self.feat_ids = self.features_file["ids"]
         self.id2idx = {img_id: idx for idx, img_id in enumerate(self.feat_ids)}
 
-        self.coco_terms_enc = self._encode_all(
-            self.coco, self.get_term_mapping, None, max_len=20
+        self.coco_terms_enc = self._encode_caps(
+            self.coco, self.get_term_mapping, "terms", max_len=20
         )  # Treat as normal caption: we want <start> and <end>
 
     def __len__(self):
@@ -175,7 +171,7 @@ class QuickCocoDataset(SemStyleDataset):
         feat_id = self.coco[idx]["img_id"]
         feat_idx = self.id2idx[feat_id]
         terms = (
-            self.coco_terms_enc[idx]
+            torch.LongTensor(self.coco_terms_enc[idx])
             if self.encode
             else ["<start>"] + self.coco[idx]["terms"] + ["<end>"]
         )
@@ -183,4 +179,3 @@ class QuickCocoDataset(SemStyleDataset):
 
     def close(self):
         self.features_file.close()
-        self.data_file.close()

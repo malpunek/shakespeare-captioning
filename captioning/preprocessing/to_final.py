@@ -133,9 +133,11 @@ def reduce_frames(coco_frame_path, shake_frame_path):
 
 def main():
     coco, shake = reduce_frames(coco_train_conf["frames"], shakespare_conf["frames"])
-    with open(coco_train_conf["final"]) as cf, open(shakespare_conf["final"]) as sf:
-        json.dump(coco, cf)
-        json.dump(shake, sf)
+    with open(coco_train_conf["final"], "wt") as cf, open(
+        shakespare_conf["final"], "wt"
+    ) as sf:
+        json.dump(coco, cf, indent=2)
+        json.dump(shake, sf, indent=2)
 
 
 if __name__ == "__main__":

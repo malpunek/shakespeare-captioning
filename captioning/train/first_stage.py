@@ -33,7 +33,7 @@ def extract_caption_len(captions):
 
 def to_batch_format(sample):
     feats, caption = sample
-    feats, caption = torch.Tensor(feats), torch.Tensor(caption).to(torch.long)
+    feats, caption = torch.Tensor(feats), caption
     feats = feats.unsqueeze(0)
     caption = caption.unsqueeze(0)
     caption, caption_len = extract_caption_len(caption)
@@ -124,8 +124,8 @@ Score = recordclass(
 def evaluate(model, mapping):
 
     dataset = QuickCocoDataset(
-        coco_val_conf["features_path"],
-        coco_train_conf["final"],
+        coco_val_conf["features"],
+        coco_val_conf["final"],
         shakespare_conf["final"],
         encode=False,
     )
@@ -162,9 +162,7 @@ def evaluate(model, mapping):
 
 def main():
     dataset = QuickCocoDataset(
-        coco_train_conf["features_path"],
-        coco_train_conf["final"],
-        shakespare_conf["final"],
+        coco_train_conf["features"], coco_train_conf["final"], shakespare_conf["final"],
     )
 
     mapping = dataset.get_term_mapping

@@ -10,6 +10,7 @@ from tqdm.auto import tqdm
 
 from ..config import (
     coco_train_conf,
+    coco_val_conf,
     get_zipped_plays_paths,
     shakespare_conf,
 )
@@ -127,7 +128,7 @@ def match(file_conll, file_in, file_out):
         with open(file_conll) as f:
             lines = list(f)
     except FileNotFoundError:
-        print(
+        raise RuntimeError(
             (
                 "Please run open-sesame (https://github.com/swabhs/open-sesame)"
                 f"with sesame.patch applied and place the output at {file_conll}"
@@ -167,10 +168,11 @@ def match(file_conll, file_in, file_out):
 
 def main():
     make_coco_basic(coco_train_conf["original"], coco_train_conf["basic"])
+    make_coco_basic(coco_val_conf["original"], coco_val_conf["basic"])
     make_shake_basic(shakespare_conf["basic"])
 
-    for conf in (coco_train_conf, shakespare_conf):
-        to_txt(conf["basic"], conf("txt"))
+    for conf in (coco_train_conf, shakespare_conf, coco_val_conf):
+        to_txt(conf["basic"], conf["txt"])
         match(conf["conll"], conf["basic"], conf["frames"])
 
 

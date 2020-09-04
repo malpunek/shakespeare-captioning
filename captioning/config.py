@@ -35,32 +35,36 @@ max_caption_len = 20
 
 # Paths
 mscoco_root_path = Path("/data/mscoco")
+computed_path = Path("/data/computed_shake/")
 new_format_path = Path("/data/new_format")
 
-if not new_format_path.exists():
-    os.makedirs(new_format_path, exist_ok=True)
+
+for p in (computed_path, new_format_path, experiment_folder):
+    if not p.exists():
+        os.makedirs(p, exist_ok=True)
 
 coco_train_conf = {
     "name": "Train",
     "imgs_root_path": mscoco_root_path / "train2014",
+    "features": computed_path / "train_features.hdf5",
     "original": mscoco_root_path / "annotations/captions_train2014.json",
     "basic": new_format_path / "train_basic.json",
     "txt": new_format_path / "train.txt",
     "conll": new_format_path / "train.conll",
     "final": new_format_path / "train_final.json",
-    "frames": new_format_path / "train_frames.json"
+    "frames": new_format_path / "train_frames.json",
 }
 
 coco_val_conf = {
     "name": "Validation",
     "imgs_root_path": mscoco_root_path / "val2014",
+    "features": computed_path / "val_features.hdf5",
     "original": mscoco_root_path / "annotations/captions_val2014.json",
     "basic": new_format_path / "val_basic.json",
     "txt": new_format_path / "val.txt",
     "conll": new_format_path / "val.conll",
     "final": new_format_path / "val_final.json",
-    "frames": new_format_path / "val_frames.json"
-
+    "frames": new_format_path / "val_frames.json",
 }
 
 shakespare_conf = {
@@ -69,8 +73,7 @@ shakespare_conf = {
     "txt": new_format_path / "shake.txt",
     "conll": new_format_path / "shake.conll",
     "final": new_format_path / "shake_final.json",
-    "frames": new_format_path / "shake_frames.json"
-
+    "frames": new_format_path / "shake_frames.json",
 }
 
 

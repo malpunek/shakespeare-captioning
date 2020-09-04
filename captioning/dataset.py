@@ -3,11 +3,14 @@ import pickle
 import sys
 from collections import Counter
 from functools import cached_property
+import json
+from itertools import chain
 
 import h5py
 import numpy as np
 from PIL import Image
 from torch.utils.data import Dataset
+from tqdm.auto import tqdm
 
 from .utils import WordIdxMap
 
@@ -189,3 +192,53 @@ class BalancedLanguageDataset(LanguageDataset):
 
     def __len__(self):
         return 2 * len(self.coco_merged)
+
+
+def reduce_vocab(a, b):
+    pass
+
+
+class NewFormatDataset(Dataset):
+    def __init__(self, coco_final_path, shake_final_path):
+        super().__init__()
+
+        with open(coco_final_path) as cf, open(shake_final_path) as sf:
+            coco = json.load(cf)
+            shake = json.load(sf)
+
+        self.coco = coco
+        self.shake = shake
+
+    def _encode(self, iterable, mapping, keyword):
+        return [mapping.encode(it[keyword]) for it in iterable]
+
+    def encode(self):
+        cmap, tmap = self.get_mappings
+        self.coco_caps_enc = self._encode(self.coco, cmap, "caption_words")
+        self.coco_terms_enc = self._encode(self.coco, tmap, "terms")
+        self.shake_caps_enc = self._encode(self.shake, cmap, "caption_words")
+        self.shake_orig_enc = self._encode(self.shake, cmap, "original_words")
+        self.shake_terms_enc = self._encode(self.shake, tmap, "terms")
+
+    @cached_property
+    def get_mappings(self):
+        terms_vocab = Counter()
+        caps_vocab = Counter()
+        store = self.to_tensor
+        self.to_tensor = False
+
+        total = len(self.coco) + len(self.shake)
+
+        for cap in tqdm(
+            chain(self.coco, self.shake), total=total, desc="Calculating mappings.."
+        ):
+            caps_vocab.update(cap["caption_words"])
+            caps_vocab.update(cap.get("original_words", []))
+            terms_vocab.update(cap["terms"])
+
+        self.to_tensor = store
+        return WordIdxMap(caps_vocab), WordIdxMap(terms_vocab)
+
+    def __getitem__(self, idx):
+        self
+

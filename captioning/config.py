@@ -35,43 +35,47 @@ max_caption_len = 20
 
 # Paths
 mscoco_root_path = Path("/data/mscoco")
-computed_root_path = Path("/data/computed_shake")
-thresh_path = computed_root_path / f"thresh_{word_occurance_threshold}"
+new_format_path = Path("/data/new_format")
 
-if not computed_root_path.exists():
-    os.makedirs(computed_root_path, exist_ok=True)
-
-if not thresh_path.exists():
-    os.makedirs(thresh_path, exist_ok=True)
+if not new_format_path.exists():
+    os.makedirs(new_format_path, exist_ok=True)
 
 coco_train_conf = {
     "name": "Train",
     "imgs_root_path": mscoco_root_path / "train2014",
-    "captions_path": mscoco_root_path / "annotations/captions_train2014.json",
-    "features_path": computed_root_path / "train_features.hdf5",
-    "semantic_captions_path": thresh_path / "semantic_train2014.json",
-    "encoded_captions_path": thresh_path / "encoded_captions_train2014.json",
-    "transformed_data_path": thresh_path / "training_full.hdf5",
+    "original": mscoco_root_path / "annotations/captions_train2014.json",
+    "basic": new_format_path / "train_basic.json",
+    "txt": new_format_path / "train.txt",
+    "conll": new_format_path / "train.conll",
+    "final": new_format_path / "train_final.json",
+    "frames": new_format_path / "train_frames.json"
 }
 
 coco_val_conf = {
     "name": "Validation",
     "imgs_root_path": mscoco_root_path / "val2014",
-    "captions_path": mscoco_root_path / "annotations/captions_val2014.json",
-    "features_path": computed_root_path / "val_features.hdf5",
-    "semantic_captions_path": thresh_path / "semantic_val2014.json",
-    "encoded_captions_path": thresh_path / "encoded_captions_val2014.json",
+    "original": mscoco_root_path / "annotations/captions_val2014.json",
+    "basic": new_format_path / "val_basic.json",
+    "txt": new_format_path / "val.txt",
+    "conll": new_format_path / "val.conll",
+    "final": new_format_path / "val_final.json",
+    "frames": new_format_path / "val_frames.json"
+
 }
 
-words_path = computed_root_path / "words.json"
-word_map_path = thresh_path / "word_map.json"
-extended_word_map_path = thresh_path / "word_map_extended.json"
-language_data_path = computed_root_path / "language_data.pkl"
+shakespare_conf = {
+    "name": "Shakespare",
+    "basic": new_format_path / "shake_basic.json",
+    "txt": new_format_path / "shake.txt",
+    "conll": new_format_path / "shake.conll",
+    "final": new_format_path / "shake_final.json",
+    "frames": new_format_path / "shake_frames.json"
+
+}
 
 
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"
-
 
 # Various script options
 
@@ -113,7 +117,7 @@ def _get_dataset(dataset_conf):
 
     return CocoCaptions(
         dataset_conf["imgs_root_path"],
-        dataset_conf["captions_path"],
+        dataset_conf["original"],
         transform=image_transform,
     )
 
@@ -144,6 +148,14 @@ def load_wn():
     from nltk.corpus import wordnet
 
     return wordnet
+
+
+@lazy
+def load_framenet():
+    setup_nltk()
+    from nltk.corpus import framenet
+
+    return framenet
 
 
 @lru_cache(maxsize=8)

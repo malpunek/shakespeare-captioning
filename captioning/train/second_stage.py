@@ -69,7 +69,7 @@ def main():
 
     writer = SummaryWriter(experiment_folder)
 
-    cmapping, tmapping = dataset.get_mappings
+    cmapping, tmapping = dataset.get_cap_mapping, dataset.get_term_mapping
 
     enc = TermEncoder(len(tmapping), 2048)
     dec = SentenceDecoderWithAttention(len(cmapping), 2048, len(cmapping))

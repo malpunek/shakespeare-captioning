@@ -34,9 +34,9 @@ experiment_folder = Path(f"runs/exp_{args.experiment:03d}")
 max_caption_len = 20
 
 # Paths
-mscoco_root_path = Path("/data/mscoco")
-computed_path = Path("/data/computed_shake/")
-new_format_path = Path("/data/new_format")
+mscoco_root_path = Path("/home/smorawski/data/mscoco")
+computed_path = Path("/home/smorawski/data/computed_shake/")
+new_format_path = Path("/home/smorawski/data/new_format")
 
 
 for p in (computed_path, new_format_path, experiment_folder):
@@ -88,8 +88,8 @@ tolkien_conf = {
 }
 
 
-plays_path = "/data/shake/merged"
-nltk_data_path = "/home/malpunek/.nltk_data"
+plays_path = "/home/smorawski/data/shake/merged"
+nltk_data_path = "/home/smorawski/nltk_data"
 
 # Various script options
 

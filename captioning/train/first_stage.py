@@ -1,6 +1,5 @@
-import json
-import os
-from contextlib import closing, redirect_stdout
+import logging
+from contextlib import closing
 from itertools import islice
 from statistics import fmean
 
@@ -104,12 +103,17 @@ def train(dataset, mapping, model, writer, criterion, optimizer):
 
 def precision(target, prediction):
     """Precision = TP/(TP + FP)"""
+    if len(prediction) == 0:
+        return 0
     tp = sum(1 for p in prediction if p in target)
     return tp / len(prediction)
 
 
 def recall(target, prediction):
     """Recall = TP/(TP + FN)"""
+    if len(target) == 0:
+        logging.warning("target shouldnt be empty (first_stage:train:recall)")
+        return 0
     tp = sum(1 for p in prediction if p in target)
     return tp / len(target)
 
@@ -129,7 +133,7 @@ def evaluate(model, mapping):
             coco_train_conf["final"],
             shakespare_conf["final"],
             encode=False,
-            val_final_file=coco_val_conf["final"]
+            val_final_file=coco_val_conf["final"],
         )
     else:
         evaluate.dataset.open_feats()

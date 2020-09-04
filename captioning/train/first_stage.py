@@ -19,7 +19,7 @@ from ..config import (
     first_stage,
     shakespare_conf,
 )
-from ..dataset import QuickCocoDataset
+from ..dataset import ValidationDataset, QuickCocoDataset
 from ..model import TermDecoder
 from ..utils import get_yn_response
 
@@ -128,12 +128,9 @@ Score = recordclass(
 def evaluate(model, mapping):
 
     if not hasattr(evaluate, "dataset"):
-        evaluate.dataset = QuickCocoDataset(
+        evaluate.dataset = ValidationDataset(
             coco_val_conf["features"],
-            coco_train_conf["final"],
-            shakespare_conf["final"],
-            encode=False,
-            val_final_file=coco_val_conf["final"],
+            coco_val_conf["final"],
         )
     else:
         evaluate.dataset.open_feats()
@@ -150,7 +147,7 @@ def evaluate(model, mapping):
     ):
         feats = torch.Tensor(feats).unsqueeze(0)
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
-        prediction, targets = prediction[1:-1], targets[1:-1]  # strip <start> and <end>
+        prediction = prediction[1:-1]  # strip <start> and <end>
 
         score.bleu += sentence_bleu(targets, prediction) / eval_size
 

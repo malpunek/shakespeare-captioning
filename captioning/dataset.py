@@ -151,7 +151,9 @@ class BalancedLanguageDataset(LanguageDataset):
 
 
 class QuickCocoDataset(SemStyleDataset):
-    def __init__(self, features_file, *args, encode=True, val_final_file=None, **kwargs):
+    def __init__(
+        self, features_file, *args, encode=True, val_final_file=None, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.encode = encode
         if val_final_file is not None:
@@ -183,6 +185,44 @@ class QuickCocoDataset(SemStyleDataset):
             else ["<start>"] + self.source[idx]["terms"] + ["<end>"]
         )
         return self.features[feat_idx], terms
+
+    def open_feats(self):
+        self.features_file = h5py.File(self.features_path, "r", driver="core")
+        self.features = self.features_file["features"]
+        self.feat_ids = self.features_file["ids"]
+
+    def close(self):
+        self.features_file.close()
+
+
+class ValidationDataset(Dataset):
+    def __init__(self, features_file, coco_val_final):
+        self.features_path = features_file
+        self.open_feats()
+
+        feat_targets = {feat_id: [] for feat_id in self.feat_ids}
+        feat_targetsd = {feat_id: [] for feat_id in self.feat_ids}
+
+        with open(coco_val_final) as vf:
+            self.coco = json.load(vf)
+
+        for ann in self.coco:
+            key = ann["img_id"]
+            if key not in feat_targets:
+                feat_targets[key] = list()
+                feat_targetsd[key] = list()
+            feat_targets[key].append(ann["terms"])
+            feat_targetsd[key].append(ann)
+
+        self.feat_targets = feat_targets
+        self.feat_targetsd = feat_targetsd
+
+    def __len__(self):
+        return len(self.feat_ids)
+
+    def __getitem__(self, idx):
+        feat_id = self.feat_ids[idx]
+        return self.features[idx], self.feat_targets[feat_id]
 
     def open_feats(self):
         self.features_file = h5py.File(self.features_path, "r", driver="core")

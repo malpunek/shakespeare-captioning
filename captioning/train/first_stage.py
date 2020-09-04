@@ -17,12 +17,12 @@ from ..config import (
     coco_val_conf,
     device,
     experiment_folder,
-    extended_word_map_path,
     first_stage,
+    shakespare_conf,
 )
-from ..dataset import CaptionHdf5Dataset, ValidationDataset
+from ..dataset import QuickCocoDataset
 from ..model import TermDecoder
-from ..utils import WordIdxMap, get_yn_response
+from ..utils import get_yn_response
 
 
 def extract_caption_len(captions):
@@ -123,11 +123,12 @@ Score = recordclass(
 
 def evaluate(model, mapping):
 
-    with open(os.devnull, "w") as f, redirect_stdout(f):
-
-        dataset = ValidationDataset(
-            coco_val_conf["semantic_captions_path"], coco_val_conf["features_path"]
-        )
+    dataset = QuickCocoDataset(
+        coco_val_conf["features_path"],
+        coco_train_conf["final"],
+        shakespare_conf["final"],
+        encode=False,
+    )
 
     model.eval()
     model.to(device)
@@ -155,18 +156,18 @@ def evaluate(model, mapping):
         score.avg_recall += fmean(r) / eval_size
         score.max_recall += max(r) / eval_size
 
+    dataset.close()
     return score
 
 
 def main():
-    dataset = CaptionHdf5Dataset(
-        coco_train_conf["features_path"], coco_train_conf["transformed_data_path"]
+    dataset = QuickCocoDataset(
+        coco_train_conf["features_path"],
+        coco_train_conf["final"],
+        shakespare_conf["final"],
     )
 
-    with open(extended_word_map_path) as f:
-        word_map = json.load(f)
-
-    mapping = WordIdxMap(word_map)
+    mapping = dataset.get_term_mapping
 
     writer = SummaryWriter(experiment_folder)
 

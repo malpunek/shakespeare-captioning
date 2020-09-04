@@ -8,9 +8,7 @@ from .config import interactive
 
 
 def get_yn_response(question: str) -> bool:
-    while (
-        response := input(question).lower()
-    ) not in "yn":
+    while (response := input(question).lower()) not in "yn":
         print(
             "Expecting one of 'YyNn'."
             f"For default press enter. You've typed: {response}"
@@ -45,7 +43,11 @@ class WordIdxMap:
 
         self.idx2word = list(
             # We want <pad> to be indexed as 0
-            chain(["<pad>"], words, ["<unk>", "<start>", "<end>"])
+            chain(
+                ["<pad>"],
+                words,
+                ["<unk>", "<start>", "<end>", "<shake_modern>", "<shake_orig>"],
+            )
         )
         self.word2idx = {w: i for i, w in enumerate(self.idx2word)}
 

@@ -5,7 +5,13 @@ from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from ..config import device, experiment_folder, language_data_path, second_stage
+from ..config import (
+    device,
+    experiment_folder,
+    coco_train_conf,
+    shakespare_conf,
+    second_stage,
+)
 from ..dataset import BalancedLanguageDataset
 from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
 from .first_stage import extract_caption_len
@@ -15,12 +21,8 @@ from .first_stage import extract_caption_len
 # torch.multiprocessing.set_sharing_strategy("file_system")
 
 
-def filter_shake(shake_captions):
-    return list(filter(lambda x: len(x[-1]) > 2, shake_captions))
-
-
-def filter_coco(coco_caps):
-    return list(filter(lambda x: len(x[-1]) > 3, coco_caps))
+def filter_fn(caps):
+    return len(caps["terms"]) > 3
 
 
 def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
@@ -42,9 +44,7 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
         optimizer.zero_grad()
 
-        out, hidden, attn = model(
-            terms, tlens, caps[:, :-1], clens + 1  # add <start>
-        )
+        out, hidden, attn = model(terms, tlens, caps[:, :-1], clens + 1)  # add <start>
         loss = criterion(out.permute(0, 2, 1), targets)
         loss.backward()
         optimizer.step()
@@ -61,10 +61,10 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
 def main():
     dataset = BalancedLanguageDataset(
-        language_data_path,
-        filter_shakespear=filter_shake,
-        filter_coco=filter_coco,
-        to_tensor=True,
+        coco_train_conf["final"],
+        shakespare_conf["final"],
+        encode=True,
+        filter_fn=filter_fn,
     )
 
     writer = SummaryWriter(experiment_folder)

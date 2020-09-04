@@ -1,13 +1,14 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 import torch
 
 from ..config import (
+    coco_train_conf,
     device,
     extended_word_map_path,
-    language_data_path,
     last_checkpoint_path,
+    shakespare_conf,
 )
 from ..dataset import BalancedLanguageDataset
 from ..model import (
@@ -18,7 +19,7 @@ from ..model import (
     TermDecoder,
     TermEncoder,
 )
-from ..train.second_stage import filter_coco, filter_shake
+from ..train.second_stage import filter_fn
 from ..utils import WordIdxMap
 from .first_stage import get_image
 
@@ -29,10 +30,10 @@ def get_mappings():
 
     mapping = WordIdxMap(word_map)
     dataset = BalancedLanguageDataset(
-        language_data_path,
-        filter_shakespear=filter_shake,
-        filter_coco=filter_coco,
-        to_tensor=True,
+        coco_train_conf["final"],
+        shakespare_conf["final"],
+        encode=True,
+        filter_fn=filter_fn,
     )
 
     cmapping, tmapping = dataset.get_mappings

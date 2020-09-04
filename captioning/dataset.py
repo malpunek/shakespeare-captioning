@@ -15,191 +15,8 @@ from tqdm.auto import tqdm
 from .utils import WordIdxMap
 
 
-class CaptionHdf5Dataset(Dataset):
-    def __init__(self, features_file, data_file):
-        super().__init__()
-        self.features_file = h5py.File(features_file, "r", driver="core")
-        self.data_file = h5py.File(data_file, "r", driver="core")
-
-        self.features = self.features_file["features"]
-        self.feat_ids = self.data_file["feat_ids"]
-        self.encoded_caps = self.data_file["encoded_caps"]
-        self.encoded_caps._local.astype = np.dtype("long")
-
-    def __len__(self):
-        return len(self.feat_ids)
-
-    def __getitem__(self, idx):
-        feat_id = self.feat_ids[idx]
-        return self.features[feat_id], self.encoded_caps[idx]
-
-    def close(self):
-        self.features_file.close()
-        self.data_file.close()
-
-
-class FullHdf5Dataset(CaptionHdf5Dataset):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.coco_ids = self.features_file["ids"]
-
-        self.filenames = self.data_file["filenames"]
-        self.coco_caps = self.data_file["coco_caps"]
-        self.semantic_caps = self.data_file["semantic_caps"]
-
-    def __getitem__(self, idx):
-        feat_id = self.feat_ids[idx]
-        return {
-            "features": self.features[feat_id],
-            "coco_id": self.coco_ids[feat_id],
-            "filename": self.filenames[idx],
-            "coco_cap": self.coco_caps[idx],
-            "semantic_cap": self.semantic_caps[idx],
-            "encoded_cap": self.encoded_caps[idx],
-        }
-
-
-class ValidationDataset(Dataset):
-    """Slightly altered torchvision.datasets.CocoCaptions
-    Provides img features instead of the image itself
-    """
-
-    def __init__(self, coco_file, features_file):
-        super().__init__()
-        from pycocotools.coco import COCO
-
-        self.coco = COCO(coco_file)
-        self.ids = list(sorted(self.coco.imgs.keys()))
-
-        self.features_file = h5py.File(features_file, "r", driver="core")
-        self.features = self.features_file["features"]
-        self.coco_ids = self.features_file["ids"]
-
-    def __getitem__(self, index):
-        assert self.ids[index] == self.coco_ids[index]
-        feats = self.features[index]
-
-        ann_ids = self.coco.getAnnIds(imgIds=self.ids[index])
-        anns = self.coco.loadAnns(ann_ids)
-        target = [ann["caption"] for ann in anns]
-
-        return feats, target
-
-    def __len__(self):
-        return len(self.ids)
-
-    def close(self):
-        self.features_file.close()
-
-
-class QualitativeDataset(ValidationDataset):
-    def __init__(self, img_folder, *args):
-        super().__init__(*args)
-        self.img_folder = img_folder
-
-    def __getitem__(self, index):
-        feats, caps = super().__getitem__()
-
-        img_id = self.ids[index]
-        path = self.coco.loadImgs(img_id)[0]["file_name"]
-        img = Image.open(os.path.join(self.img_folder, path)).convert("RGB")
-
-        return feats, caps, img
-
-
-class LanguageDataset(Dataset):
-    def __init__(
-        self,
-        language_data_path,
-        filter_coco=None,
-        filter_shakespear=None,
-        to_tensor=False,
-    ):
-        super().__init__()
-        with open(language_data_path, "rb") as f:
-            data = pickle.load(f)
-
-        self.coco_merged = data["coco_merged"]  # [(caption, terms)..]
-        self.shakesp_merged = data["shakesp_merged"]  # [(shakesperan, modern, terms)..]
-
-        if filter_coco is not None:
-            self.coco_merged = filter_coco(self.coco_merged)
-        if filter_shakespear is not None:
-            self.shakesp_merged = filter_shakespear(self.shakesp_merged)
-        self.to_tensor = to_tensor
-
-    def __getitem__(self, idx):
-        """
-        Returns:
-            caption: The target caption
-            terms: The semantic terms
-        """
-        if isinstance(idx, slice):
-            return [
-                self(i)
-                for i in range(idx.start or 0, idx.stop or sys.maxsize, idx.step or 1)
-            ]
-
-        def helper(idx):
-            if idx < len(self.coco_merged):
-                return self.coco_merged[idx]
-
-            idx -= len(self.coco_merged)
-
-            if idx < len(self.shakesp_merged):
-                return (
-                    self.shakesp_merged[idx][0],
-                    self.shakesp_merged[idx][-1] + ["<style>"],
-                )
-
-            idx -= len(self.shakesp_merged)
-            return self.shakesp_merged[idx][1], self.shakesp_merged[idx][-1]
-
-        caption, terms = helper(idx)
-        if self.to_tensor:
-            cm, tm = self.get_mappings
-            caption = cm.prepare_for_training(caption, max_caption_len=60)
-            terms = tm.prepare_for_training(terms, max_caption_len=30, terms=True)
-        return caption, terms
-
-    def __len__(self):
-        return len(self.coco_merged) + 2 * len(self.shakesp_merged)
-
-    @cached_property
-    def get_mappings(self):
-        terms_vocab = Counter()
-        caps_vocab = Counter()
-        store = self.to_tensor
-        self.to_tensor = False
-        for caption, terms in self:
-            caps_vocab.update(caption)
-            terms_vocab.update(terms)
-
-        self.to_tensor = store
-
-        return WordIdxMap(caps_vocab), WordIdxMap(terms_vocab)
-
-
-class BalancedLanguageDataset(LanguageDataset):
-    def __getitem__(self, idx):
-        if idx < len(self.coco_merged):
-            return super().__getitem__(idx)
-        elif idx < 2 * len(self.coco_merged):
-            idx -= len(self.coco_merged)
-            idx %= 2 * len(self.shakesp_merged)
-            return super().__getitem__(idx + len(self.coco_merged))
-        raise IndexError
-
-    def __len__(self):
-        return 2 * len(self.coco_merged)
-
-
-def reduce_vocab(a, b):
-    pass
-
-
-class NewFormatDataset(Dataset):
-    def __init__(self, coco_final_path, shake_final_path):
+class SemStyleDataset(Dataset):
+    def __init__(self, coco_final_path, shake_final_path, filter_fn=None):
         super().__init__()
 
         with open(coco_final_path) as cf, open(shake_final_path) as sf:
@@ -209,36 +26,161 @@ class NewFormatDataset(Dataset):
         self.coco = coco
         self.shake = shake
 
-    def _encode(self, iterable, mapping, keyword):
-        return [mapping.encode(it[keyword]) for it in iterable]
-
-    def encode(self):
-        cmap, tmap = self.get_mappings
-        self.coco_caps_enc = self._encode(self.coco, cmap, "caption_words")
-        self.coco_terms_enc = self._encode(self.coco, tmap, "terms")
-        self.shake_caps_enc = self._encode(self.shake, cmap, "caption_words")
-        self.shake_orig_enc = self._encode(self.shake, cmap, "original_words")
-        self.shake_terms_enc = self._encode(self.shake, tmap, "terms")
+        if filter_fn is not None:
+            self.coco = list(filter(filter_fn, self.coco))
+            self.shake = list(filter(filter_fn, self.shake))
 
     @cached_property
-    def get_mappings(self):
-        terms_vocab = Counter()
+    def get_cap_mapping(self):
         caps_vocab = Counter()
-        store = self.to_tensor
-        self.to_tensor = False
 
         total = len(self.coco) + len(self.shake)
-
         for cap in tqdm(
-            chain(self.coco, self.shake), total=total, desc="Calculating mappings.."
+            chain(self.coco, self.shake), total=total, desc="Calculating cap mapping",
         ):
             caps_vocab.update(cap["caption_words"])
             caps_vocab.update(cap.get("original_words", []))
-            terms_vocab.update(cap["terms"])
 
-        self.to_tensor = store
-        return WordIdxMap(caps_vocab), WordIdxMap(terms_vocab)
+        return WordIdxMap(caps_vocab)
+
+    @cached_property
+    def get_term_mapping(self):
+        terms_vocab = Counter()
+
+        total = len(self.coco) + len(self.shake)
+        for cap in tqdm(
+            chain(self.coco, self.shake), total=total, desc="Calculating term mapping",
+        ):
+            terms_vocab.update(cap["terns"])
+
+        return WordIdxMap(terms_vocab)
+
+    def _encode_caps(self, iterable, mapping, keyword, max_len=60):
+        return [
+            mapping.prepare_for_training(it[keyword], max_caption_len=max_len)
+            for it in iterable
+        ]
+
+    def _encode_terms(self, iterable, mapping, style, max_len=20):
+        if style:
+            for it in iterable:
+                it["terms"] = list(it["terms"]) + [style]
+        return [
+            mapping.prepare_for_training(
+                it["terms"], max_caption_len=max_len, terms=True
+            )
+            for it in iterable
+        ]
+
+
+class LanguageDataset(SemStyleDataset):
+    def __init__(self, *args, encode=True, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.encode = encode
+
+        # Captions
+        self.coco_caps_enc = self._encode_all(
+            self.coco, self.get_cap_mapping, "caption_words"
+        )
+        self.shake_modern_enc = self._encode_all(
+            self.shake, self.get_cap_mapping, "caption_words"
+        )
+        self.shake_orig_enc = self._encode_all(
+            self.shake, self.get_cap_mapping, "original_words"
+        )
+
+        # Terms:
+        self.coco_terms_enc = self._encode_terms(
+            self.coco, self.get_term_mapping, None, max_len=20
+        )
+
+        self.shake_modern_terms_enc = self._encode_terms(
+            self.coco, self.get_term_mapping, "<shake_modern>", max_len=20
+        )
+        self.shake_orig_terms_enc = self._encode_terms(
+            self.coco, self.get_term_mapping, "<shake_orig>", max_len=20
+        )
+
+    def get_coco(self, idx):
+        if self.encode:
+            return self.coco_caps_enc[idx], self.coco_terms_enc[idx]
+        item = self.coco[idx]
+        return item["caption_words"], item["terms"]
+
+    def get_shake_modern(self, idx):
+        if self.encode:
+            return self.shake_modern_enc[idx], self.shake_modern_terms_enc[idx]
+        item = self.shake[idx]
+        return item["caption_words"], item["terms"]
+
+    def get_shake_orig(self, idx):
+        if self.encode:
+            return self.shake_orig_enc[idx], self.shake_orig_terms_enc[idx]
+        item = self.shake[idx]
+        return item["original_words"], item["terms"]
 
     def __getitem__(self, idx):
-        self
+        if isinstance(idx, slice):
+            return [
+                self(i)
+                for i in range(idx.start or 0, idx.stop or sys.maxsize, idx.step or 1)
+            ]
 
+        if idx < len(self.coco):
+            return self.get_coco(idx)
+
+        idx -= len(self.coco)
+        if idx < len(self.shake):
+            return self.get_shake_modern(idx)
+        idx -= len(self.shake)
+        return self.get_shake_orig(idx)
+
+    def __len__(self):
+        return len(self.coco) + 2 * len(self.shake)
+
+
+class BalancedLanguageDataset(LanguageDataset):
+    def __getitem__(self, idx):
+        if idx < len(self.coco):
+            return super().__getitem__(idx)
+        idx -= len(self.coco)
+        if idx < len(self.coco):
+            return self.get_shake_modern(idx % len(self.shake))
+        idx -= len(self.coco)
+        if idx < len(self.coco):
+            return self.get_shake_orig(idx % len(self.shake))
+        raise IndexError
+
+    def __len__(self):
+        return 3 * len(self.coco_merged)
+
+
+class QuickCocoDataset(SemStyleDataset):
+    def __init__(self, features_file, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.features_file = h5py.File(features_file, "r", driver="core")
+
+        self.features = self.features_file["features"]
+        self.feat_ids = self.features_file["ids"]
+        self.id2idx = {img_id: idx for idx, img_id in enumerate(self.feat_ids)}
+
+        self.coco_terms_enc = self._encode_all(
+            self.coco, self.get_term_mapping, None, max_len=20
+        )  # Treat as normal caption: we want <start> and <end>
+
+    def __len__(self):
+        return len(self.coco)
+
+    def __getitem__(self, idx):
+        feat_id = self.coco[idx]["img_id"]
+        feat_idx = self.id2idx[feat_id]
+        terms = (
+            self.coco_terms_enc[idx]
+            if self.encode
+            else ["<start>"] + self.coco[idx]["terms"] + ["<end>"]
+        )
+        return self.features[feat_idx], terms
+
+    def close(self):
+        self.features_file.close()
+        self.data_file.close()

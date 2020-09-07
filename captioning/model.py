@@ -330,10 +330,16 @@ class SemStyle(nn.Module):
     def forward(self, img, style=False):
         terms, _ = self.img_to_term(img, self.mmap)
         terms = terms[1:-1]
+        if not terms:
+            return (terms, [], [])
         if style:
             terms = terms + ["<style>"]
         orig_terms = list(terms)
         terms = self.tmap.prepare_for_training(terms, max_caption_len=20, terms=True)
         terms = torch.LongTensor(terms).unsqueeze(0)
         terms, tlens = extract_caption_len(terms)
-        return orig_terms, *self.language_generator.forward_eval(terms, tlens, self.cmap)
+        return (
+            orig_terms,
+            *self.language_generator.forward_eval(terms, tlens, self.cmap),
+        )
+

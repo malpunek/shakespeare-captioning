@@ -19,15 +19,10 @@ from ..config import (
     first_stage,
     shakespare_conf,
 )
-from ..dataset import ValidationDataset, QuickCocoDataset
+from ..dataset import QuickCocoDataset, ValidationDataset
 from ..model import TermDecoder
 from ..utils import get_yn_response
-
-
-def extract_caption_len(captions):
-    captions_lens = captions[:, -1]
-    captions = captions[:, :-1]
-    return captions, captions_lens
+from .misc import extract_caption_len, filter_fn
 
 
 def to_batch_format(sample):
@@ -129,8 +124,7 @@ def evaluate(model, mapping):
 
     if not hasattr(evaluate, "dataset"):
         evaluate.dataset = ValidationDataset(
-            coco_val_conf["features"],
-            coco_val_conf["final"],
+            coco_val_conf["features"], coco_val_conf["final"],
         )
     else:
         evaluate.dataset.open_feats()
@@ -165,7 +159,10 @@ def evaluate(model, mapping):
 
 def main():
     dataset = QuickCocoDataset(
-        coco_train_conf["features"], coco_train_conf["final"], shakespare_conf["final"],
+        coco_train_conf["features"],
+        coco_train_conf["final"],
+        shakespare_conf["final"],
+        filter_fn=filter_fn,
     )
 
     mapping = dataset.get_term_mapping

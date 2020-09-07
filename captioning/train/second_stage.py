@@ -14,15 +14,11 @@ from ..config import (
 )
 from ..dataset import BalancedLanguageDataset
 from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
-from .first_stage import extract_caption_len
+from .misc import filter_fn, extract_caption_len
 
-
+# In case of "RuntimeError: received 0 items of ancdata"
 # https://github.com/pytorch/pytorch/issues/973
 # torch.multiprocessing.set_sharing_strategy("file_system")
-
-
-def filter_fn(caps):
-    return len(caps["terms"]) > 3
 
 
 def train(model, dataset, mapping, criterion, optimizer, writer, epoch):

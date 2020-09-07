@@ -1,5 +1,5 @@
-def filter_fn(caps):
-    return len(caps["terms"]) > 3
+def filter_short(caps, min_len=3):
+    return len(caps["terms"]) > min_len
 
 
 def extract_caption_len(captions):

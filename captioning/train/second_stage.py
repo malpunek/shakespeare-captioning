@@ -14,7 +14,7 @@ from ..config import (
 )
 from ..dataset import BalancedLanguageDataset
 from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
-from .misc import filter_fn, extract_caption_len
+from .misc import filter_short, extract_caption_len
 
 # In case of "RuntimeError: received 0 items of ancdata"
 # https://github.com/pytorch/pytorch/issues/973
@@ -60,7 +60,7 @@ def main():
         coco_train_conf["final"],
         shakespare_conf["final"],
         encode=True,
-        filter_fn=filter_fn,
+        filter_fn=filter_short,
     )
 
     writer = SummaryWriter(experiment_folder)

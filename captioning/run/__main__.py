@@ -17,7 +17,7 @@ from ..model import (
     TermDecoder,
     TermEncoder,
 )
-from ..train.second_stage import filter_fn
+from ..train.second_stage import filter_short
 from .first_stage import get_image
 
 
@@ -36,7 +36,7 @@ def get_mappings():
         coco_train_conf["final"],
         shakespare_conf["final"],
         encode=False,
-        filter_fn=filter_fn,
+        filter_fn=filter_short,
     )
     tmap2, cmapping = dataset.get_term_mapping, dataset.get_cap_mapping
 
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     import sys
     import select
 
-    print(f"Evaluating {last_checkpoint_path(2)}")
+    print(f"Evaluating {last_checkpoint_path(), last_checkpoint_path(2)}")
     print("Provide img dir")
     i, _, _ = select.select([sys.stdin], [], [], 15)
     img_dir = sys.stdin.readline().strip() if i else "mini_val"

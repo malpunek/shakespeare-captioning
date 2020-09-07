@@ -22,7 +22,7 @@ from ..config import (
 from ..dataset import QuickCocoDataset, ValidationDataset
 from ..model import TermDecoder
 from ..utils import get_yn_response
-from .misc import extract_caption_len, filter_fn
+from .misc import extract_caption_len, filter_short
 
 
 def to_batch_format(sample):
@@ -162,7 +162,7 @@ def main():
         coco_train_conf["features"],
         coco_train_conf["final"],
         shakespare_conf["final"],
-        filter_fn=filter_fn,
+        filter_fn=filter_short,
     )
 
     mapping = dataset.get_term_mapping

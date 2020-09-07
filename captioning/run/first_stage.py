@@ -11,7 +11,7 @@ from ..config import (
     shakespare_conf,
 )
 from ..dataset import SemStyleDataset
-from ..train.misc import filter_fn
+from ..train.misc import filter_short
 from ..model import ImgToTermNet, TermDecoder
 
 
@@ -30,7 +30,7 @@ def run_path(model, mapping, img_path):
 def main():
 
     mapping = SemStyleDataset(
-        coco_train_conf["final"], shakespare_conf["final"], filter_fn=filter_fn
+        coco_train_conf["final"], shakespare_conf["final"], filter_fn=filter_short
     ).get_term_mapping
     vocab_size = len(mapping)
 

@@ -73,6 +73,7 @@ class LanguageDataset(SemStyleDataset):
         super().__init__(*args, **kwargs)
         self.encode = encode
 
+    def calculate_encoded(self):
         # Captions
         self.coco_caps_enc = self._encode_caps(
             self.coco, self.get_cap_mapping, "caption_words"
@@ -95,6 +96,16 @@ class LanguageDataset(SemStyleDataset):
         self.shake_orig_terms_enc = self._encode_terms(
             self.shake, self.get_term_mapping, "<shake_orig>", max_len=20
         )
+
+    @property
+    def encode(self):
+        return self._encode
+
+    @encode.setter
+    def encode(self, value):
+        self._encode = value
+        if value and not hasattr(self, "coco_caps_enc"):
+            self.calculate_encoded()
 
     def get_coco(self, idx):
         if self.encode:

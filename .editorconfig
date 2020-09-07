@@ -12,6 +12,7 @@ insert_final_newline = true
 # Set default charset
 [*.{md,py}]
 charset = utf-8
+trim_trailing_whitespace = true
 
 # 4 space indentation
 [*.py]
@@ -20,10 +21,10 @@ indent_size = 4
 line_length = 88
 multi_line_output = 0
 combine_as_imports = True
+insert_final_newline = True
 
 
 # Indentation for markdown
 [*.md]
 indent_style = space
 indent_size = 2
-

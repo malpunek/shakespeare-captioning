@@ -1,3 +1,227 @@
+# Experiment 21 epochs 15,29
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000042.jpg)
+--------------------
+['bear_NOUN']
+--------------------
+Normal: a big version of teddy bear
+--------------------
+Styled: a big version of a polar bear
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000073.jpg)
+--------------------
+['Placing_FRAME']
+--------------------
+Normal: a big bed with a stuffed animal laying on a pillow
+--------------------
+Styled: a big bed with a stuffed animal and a pillow
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000074.jpg)
+--------------------
+['dog_NOUN', 'sidewalk_NOUN', 'Posture_FRAME']
+--------------------
+Normal: a dog sitting on a sidewalk next to a tall building
+--------------------
+Styled: a dog sitting on a sidewalk next to a tall building
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000133.jpg)
+--------------------
+['room_NOUN']
+--------------------
+Normal: a room with a couch and a bright blue color scheme
+--------------------
+Styled: a room with a bright blue color scheme
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000136.jpg)
+--------------------
+[]
+--------------------
+Normal:
+--------------------
+Styled:
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000139.jpg)
+--------------------
+['living_NOUN', 'room_NOUN', 'fire_NOUN', 'place_NOUN']
+--------------------
+Normal: a living room with a couch and a television
+--------------------
+Styled: a living room with a couch and a television
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000143.jpg)
+--------------------
+['bird_NOUN', 'tree_NOUN', 'branch_NOUN', 'forest_NOUN', 'Posture_FRAME']
+--------------------
+Normal: a bird sitting on a tree branch
+--------------------
+Styled: a bird sitting on a tree branch
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000164.jpg)
+--------------------
+['room_NOUN', 'sink_NOUN']
+--------------------
+Normal: a room with a sink and a piano
+--------------------
+Styled: a room with a sink and a piano
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000192.jpg)
+--------------------
+['player_NOUN', 'field_NOUN']
+--------------------
+Normal: a baseball player in mid swing
+--------------------
+Styled: a baseball player in mid swing
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000196.jpg)
+--------------------
+['food_NOUN']
+--------------------
+Normal: a food tray with food and a plastic container
+--------------------
+Styled: a food tray with a plastic fork and other patrons
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000208.jpg)
+--------------------
+['bathroom_NOUN', 'sink_NOUN']
+--------------------
+Normal: a bathroom sink with a toilet and sink
+--------------------
+Styled: a bathroom sink with a toilet and sink
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000241.jpg)
+--------------------
+['group_NOUN', 'people_NOUN', 'Posture_FRAME']
+--------------------
+Normal: a group of people sitting on a skateboard
+--------------------
+Styled: a group of people sitting on a skateboard
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000257.jpg)
+--------------------
+['people_NOUN', 'bus_NOUN', 'stop_NOUN', 'Posture_FRAME']
+--------------------
+Normal: several people sitting at a bus stop
+--------------------
+Styled: several people sitting at a bus stop
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000283.jpg)
+--------------------
+['glass_NOUN', 'wine_NOUN', 'glass_NOUN', 'bottom_NOUN']
+--------------------
+Normal: a glass of wine with a glass of wine glasses
+--------------------
+Styled: a glass of wine with a glass of wine
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000285.jpg)
+--------------------
+['bear_NOUN', 'standing_NOUN', 'rock_NOUN']
+--------------------
+Normal: a polar bear standing on a rock near a rock formation
+--------------------
+Styled: a polar bear standing on a rock surrounded by tall rocks
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000294.jpg)
+--------------------
+['woman_NOUN', 'kitchen_NOUN', 'Activity_prepare_FRAME']
+--------------------
+Normal: a woman in a kitchen preparing to serve
+--------------------
+Styled: a woman in a kitchen preparing to serve
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000328.jpg)
+--------------------
+['group_NOUN', 'people_NOUN', 'park_NOUN', 'bench_NOUN', 'Posture_FRAME']
+--------------------
+Normal: a group of people sitting on a park bench
+--------------------
+Styled: a group of people sitting on a park bench
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000338.jpg)
+--------------------
+['woman_NOUN', 'kitchen_NOUN']
+--------------------
+Normal: a woman arranging a kitchen
+--------------------
+Styled: a woman in a kitchen with a white shirt and a white sink
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000357.jpg)
+--------------------
+['player_NOUN', 'field_NOUN']
+--------------------
+Normal: a baseball player in mid swing
+--------------------
+Styled: a baseball player in mid swing
+--------------------
+
+
+
+![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000359.jpg)
+--------------------
+['light_NOUN', 'building_NOUN']
+--------------------
+Normal: a traffic light with a building
+--------------------
+Styled: a traffic light with a building
+--------------------
+
+
+
+
+
 # Epochs 44 and 5
 ![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000042.jpg)
 --------------------
@@ -439,5 +663,3 @@ Normal: traffic lights on a traffic light
 --------------------
 Styled: traffic lights in the streets
 --------------------
-
-

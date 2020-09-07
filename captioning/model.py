@@ -342,4 +342,3 @@ class SemStyle(nn.Module):
             orig_terms,
             *self.language_generator.forward_eval(terms, tlens, self.cmap),
         )
-

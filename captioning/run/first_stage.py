@@ -1,17 +1,18 @@
-import json
 from pathlib import Path
 
 import torch
 from PIL import Image
 
 from ..config import (
+    coco_train_conf,
     device,
-    extended_word_map_path,
     image_transform,
     last_checkpoint_path,
+    shakespare_conf,
 )
+from ..dataset import SemStyleDataset
+from ..train.misc import filter_fn
 from ..model import ImgToTermNet, TermDecoder
-from ..utils import WordIdxMap
 
 
 def get_image(img_path):
@@ -27,10 +28,10 @@ def run_path(model, mapping, img_path):
 
 
 def main():
-    with open(extended_word_map_path) as f:
-        word_map = json.load(f)
 
-    mapping = WordIdxMap(word_map)
+    mapping = SemStyleDataset(
+        coco_train_conf["final"], shakespare_conf["final"], filter_fn=filter_fn
+    ).get_term_mapping
     vocab_size = len(mapping)
 
     dec = TermDecoder(vocab_size, 2048, 2048)

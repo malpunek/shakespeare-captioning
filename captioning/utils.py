@@ -70,9 +70,9 @@ class WordIdxMap:
     def prepare_for_training(self, words, max_caption_len, terms=False):
         words = words[: max_caption_len - 2]
         # Dont surround with start end if in terms mode
-        start = (self["<start>"],) if not terms else tuple()
-        end = (self["<end>"],) if not terms else (self["<pad>"], self["<pad>"])
-        pad = (self["<pad>"] for _ in range(max_caption_len - 2 - len(words)))
+        start = (self["<start>"],) * (not terms)
+        end = (self["<end>"],) * (not terms)
+        pad = (self["<pad>"],) * (max_caption_len - len(words) - len(start) - len(end))
         term_len = (len(words),)
         words = chain(start, self.encode(words), end, pad, term_len)
         return list(words)

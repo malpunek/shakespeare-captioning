@@ -3,6 +3,7 @@ import sys
 from collections import Counter
 from functools import cached_property
 from itertools import chain
+from operator import itemgetter
 
 import h5py
 import torch
@@ -231,3 +232,33 @@ class ValidationDataset(Dataset, FeatureMixin):
         feat_id = self.feat_ids[idx]
         return self.features[idx], self.feat_targets[feat_id]
 
+
+class AllTermsDataset(SemStyleDataset, FeatureMixin):
+    def __init__(self, features_path, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.open_feats(features_path)
+
+        coco_img_ids = list(set(map(itemgetter("img_id"), self.coco)))
+        id_map = {img_id: [] for img_id in coco_img_ids}
+
+        for i, c in enumerate(tqdm(self.coco, desc="Merging terms")):
+            id_map[c["img_id"]].append(c["terms"])
+
+        self.merged_terms = {
+            img_id: list(set(chain.from_iterable(terms)))
+            for img_id, terms in tqdm(
+                id_map.items(), desc="Chaining", total=len(id_map)
+            )
+        }
+
+        assert all(
+            idx in self.merged_terms for idx in tqdm(self.feat_ids, desc="Asserting")
+        )
+
+    def __getitem__(self, idx):
+        feat_id = self.feat_ids[idx]
+        return self.features[idx], self.merged_terms[feat_id]
+
+    def __len__(self):
+        return len(self.feat_ids)

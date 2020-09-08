@@ -1,4 +1,3 @@
-import logging
 from contextlib import closing
 from itertools import islice
 from statistics import fmean
@@ -12,17 +11,16 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm.auto import tqdm, trange
 
 from ..config import (
-    coco_train_conf,
     coco_val_conf,
     device,
     experiment_folder,
     first_stage,
-    shakespare_conf,
+    first_stage_dataset
 )
-from ..dataset import QuickCocoDataset, ValidationDataset
+from ..dataset import ValidationDataset
 from ..model import TermDecoder
 from ..utils import get_yn_response
-from .misc import extract_caption_len, filter_short
+from .misc import extract_caption_len
 
 
 def to_batch_format(sample):
@@ -107,7 +105,6 @@ def precision(target, prediction):
 def recall(target, prediction):
     """Recall = TP/(TP + FN)"""
     if len(target) == 0:
-        logging.warning("target shouldnt be empty (first_stage:train:recall)")
         return 0
     tp = sum(1 for p in prediction if p in target)
     return tp / len(target)
@@ -158,12 +155,7 @@ def evaluate(model, mapping):
 
 
 def main():
-    dataset = QuickCocoDataset(
-        coco_train_conf["features"],
-        coco_train_conf["final"],
-        shakespare_conf["final"],
-        filter_fn=filter_short,
-    )
+    dataset = first_stage_dataset()
 
     mapping = dataset.get_term_mapping
 

@@ -4,8 +4,6 @@ from pathlib import Path
 
 import torch
 
-from .config import interactive
-
 
 def get_yn_response(question: str) -> bool:
     while (response := input(question).lower()) not in "yn":
@@ -30,6 +28,8 @@ def ask_overwrite(path: str) -> bool:
         return True
 
     # path exists
+    from .config import interactive
+
     if not interactive:
         return False
 

@@ -190,6 +190,21 @@ def load_wn_nlp(model="en_core_web_lg"):
     return nlp
 
 
+# ##### TRAINING #####
+@lazy
+def first_stage_dataset():
+    # TODO some other way of switching to QuickCoco
+    from .dataset import AllTermsDataset  # , QuickCocoDataset
+
+    args = [
+        coco_train_conf["features"],
+        coco_train_conf["final"],
+        shakespare_conf["final"],
+    ]
+    # QuickCocoDataset(*args, filter_fn=filter_short,)
+    return AllTermsDataset(*args)
+
+
 # ##### UTILS #####
 
 

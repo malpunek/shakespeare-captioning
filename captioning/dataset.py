@@ -245,8 +245,14 @@ class AllTermsDataset(SemStyleDataset, FeatureMixin):
         for i, c in enumerate(tqdm(self.coco, desc="Merging terms")):
             id_map[c["img_id"]].append(c["terms"])
 
+        tmap = self.get_term_mapping
+
         self.merged_terms = {
-            img_id: list(set(chain.from_iterable(terms)))
+            img_id: torch.LongTensor(
+                tmap.prepare_for_training(
+                    list(set(chain.from_iterable(terms))), max_caption_len=20
+                )
+            )
             for img_id, terms in tqdm(
                 id_map.items(), desc="Chaining", total=len(id_map)
             )

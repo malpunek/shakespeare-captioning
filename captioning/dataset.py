@@ -161,9 +161,22 @@ class BalancedLanguageDataset(LanguageDataset):
         return 3 * len(self.coco)
 
 
-class QuickCocoDataset(SemStyleDataset):
+class FeatureMixin:
+    def open_feats(self, path=None):
+        if path:
+            self.features_path = path
+
+        self.features_file = h5py.File(self.features_path, "r", driver="core")
+        self.features = self.features_file["features"]
+        self.feat_ids = self.features_file["ids"]
+
+    def close(self):
+        self.features_file.close()
+
+
+class QuickCocoDataset(SemStyleDataset, FeatureMixin):
     def __init__(
-        self, features_file, *args, encode=True, val_final_file=None, **kwargs
+        self, features_path, *args, encode=True, val_final_file=None, **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.encode = encode
@@ -173,11 +186,7 @@ class QuickCocoDataset(SemStyleDataset):
         else:
             self.source = self.coco
 
-        self.features_path = features_file
-        self.features_file = h5py.File(self.features_path, "r", driver="core")
-
-        self.features = self.features_file["features"]
-        self.feat_ids = self.features_file["ids"]
+        self.open_feats(features_path)
         self.id2idx = {img_id: idx for idx, img_id in enumerate(self.feat_ids)}
 
         self.coco_terms_enc = self._encode_caps(
@@ -197,22 +206,12 @@ class QuickCocoDataset(SemStyleDataset):
         )
         return self.features[feat_idx], terms
 
-    def open_feats(self):
-        self.features_file = h5py.File(self.features_path, "r", driver="core")
-        self.features = self.features_file["features"]
-        self.feat_ids = self.features_file["ids"]
 
-    def close(self):
-        self.features_file.close()
-
-
-class ValidationDataset(Dataset):
-    def __init__(self, features_file, coco_val_final):
-        self.features_path = features_file
-        self.open_feats()
+class ValidationDataset(Dataset, FeatureMixin):
+    def __init__(self, features_path, coco_val_final):
+        self.open_feats(features_path)
 
         feat_targets = {feat_id: [] for feat_id in self.feat_ids}
-        feat_targetsd = {feat_id: [] for feat_id in self.feat_ids}
 
         with open(coco_val_final) as vf:
             self.coco = json.load(vf)
@@ -221,12 +220,9 @@ class ValidationDataset(Dataset):
             key = ann["img_id"]
             if key not in feat_targets:
                 feat_targets[key] = list()
-                feat_targetsd[key] = list()
             feat_targets[key].append(ann["terms"])
-            feat_targetsd[key].append(ann)
 
         self.feat_targets = feat_targets
-        self.feat_targetsd = feat_targetsd
 
     def __len__(self):
         return len(self.feat_ids)
@@ -235,10 +231,3 @@ class ValidationDataset(Dataset):
         feat_id = self.feat_ids[idx]
         return self.features[idx], self.feat_targets[feat_id]
 
-    def open_feats(self):
-        self.features_file = h5py.File(self.features_path, "r", driver="core")
-        self.features = self.features_file["features"]
-        self.feat_ids = self.features_file["ids"]
-
-    def close(self):
-        self.features_file.close()

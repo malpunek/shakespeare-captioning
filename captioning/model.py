@@ -327,13 +327,13 @@ class SemStyle(nn.Module):
         self.tmap = tmap
         self.cmap = cmap
 
-    def forward(self, img, style=False):
+    def forward(self, img, style=None):
         terms, _ = self.img_to_term(img, self.mmap)
         terms = terms[1:-1]
         if not terms:
             return (terms, [], [])
         if style:
-            terms = terms + ["<shake_orig>"]
+            terms = terms + [style]
         orig_terms = list(terms)
         terms = self.tmap.prepare_for_training(terms, max_caption_len=20, terms=True)
         terms = torch.LongTensor(terms).unsqueeze(0)

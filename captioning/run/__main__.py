@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import torch
+from tqdm.auto import tqdm
 
 from ..config import (
     coco_train_conf,
@@ -71,17 +72,19 @@ def main(img_dir):
     model = SemStyle(term_gen, lang_gen, tmap1, tmap, cmap)
     model.eval()
 
-    for sub_path in sorted(img_dir.iterdir()):
+    for sub_path in tqdm(sorted(img_dir.iterdir()), desc="Computing captions.."):
         if sub_path.suffix not in (".jpg", ".png"):
             continue
         terms, cap, _ = model(get_image(sub_path))
-        _, scap, _ = model(get_image(sub_path), True)
+        _, so_cap, _ = model(get_image(sub_path), "<shake_orig>")
+        _, sm_cap, _ = model(get_image(sub_path), "<shake_modern>")
 
         print(f"![Sample image](https://students.mimuw.edu.pl/~sm371229/{sub_path})")
         for meat in (
             terms,
             "Normal: " + " ".join(cap[1:-1]),
-            "Styled: " + " ".join(scap[1:-1]),
+            "Styled Original: " + " ".join(so_cap[1:-1]),
+            "Styled Modern: " + " ".join(sm_cap[1:-1]),
         ):
             print("-" * 20)
             print(meat)

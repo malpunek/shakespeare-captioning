@@ -1,16 +1,15 @@
 # Experiment 21 epochs 15,29
 
 Evaluating (PosixPath('runs/exp_021/model_ep015.pth'), PosixPath('runs/exp_021/language_ep029.pth'))
-
-Evaluating images from mini_val
-
 ![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000042.jpg)
 --------------------
 ['bear_NOUN']
 --------------------
 Normal: a big version of teddy bear
 --------------------
-Styled: and in this habit to the world i will be a married and my brother
+Styled Original: and in this habit to the world i will be a married and my brother
+--------------------
+Styled Modern: and now you toss up your poor england
 --------------------
 
 
@@ -21,7 +20,9 @@ Styled: and in this habit to the world i will be a married and my brother
 --------------------
 Normal: a big bed with a stuffed animal laying on a pillow
 --------------------
-Styled: he has a horse and my gracious lord
+Styled Original: he has a horse and my gracious lord
+--------------------
+Styled Modern: i have to put on your nightgown in the motion of that i am fighting
 --------------------
 
 
@@ -32,7 +33,9 @@ Styled: he has a horse and my gracious lord
 --------------------
 Normal: a dog sitting on a sidewalk next to a tall building
 --------------------
-Styled: i will do a dog and a few persons
+Styled Original: i will do a dog and a few persons
+--------------------
+Styled Modern: i will begin the dog and be a lover of the moon than the moon of a roman wars
 --------------------
 
 
@@ -43,7 +46,9 @@ Styled: i will do a dog and a few persons
 --------------------
 Normal: a room with a couch and a bright blue color scheme
 --------------------
-Styled: i have a fat oxen and bound to put on
+Styled Original: i have a fat oxen and bound to put on
+--------------------
+Styled Modern: i have shut it on my room and just there is very sad
 --------------------
 
 
@@ -54,7 +59,9 @@ Styled: i have a fat oxen and bound to put on
 --------------------
 Normal:
 --------------------
-Styled:
+Styled Original:
+--------------------
+Styled Modern:
 --------------------
 
 
@@ -65,7 +72,9 @@ Styled:
 --------------------
 Normal: a living room with a couch and a television
 --------------------
-Styled: i will have a little ere i can do with a good thing i will be a villain
+Styled Original: i will have a little ere i can do with a good thing i will be a villain
+--------------------
+Styled Modern: i am a big living room with a sweet and fire place that i am in the earth
 --------------------
 
 
@@ -76,7 +85,9 @@ Styled: i will have a little ere i can do with a good thing i will be a villain
 --------------------
 Normal: a bird sitting on a tree branch
 --------------------
-Styled: thou didst usurp the night owl in a forest and bid the tree
+Styled Original: thou didst usurp the night owl in a forest and bid the tree
+--------------------
+Styled Modern: you should have a tree and that i will just like a forest and will my state of the forest in the forest
 --------------------
 
 
@@ -87,7 +98,9 @@ Styled: thou didst usurp the night owl in a forest and bid the tree
 --------------------
 Normal: a room with a sink and a piano
 --------------------
-Styled: i will have a queen and a very big in my blood to a little and buy my head
+Styled Original: i will have a queen and a very big in my blood to a little and buy my head
+--------------------
+Styled Modern: i am in my room and iago just confessed that he put it with all his own shadow
 --------------------
 
 
@@ -98,7 +111,9 @@ Styled: i will have a queen and a very big in my blood to a little and buy my he
 --------------------
 Normal: a baseball player in mid swing
 --------------------
-Styled: a little field with a players on the field
+Styled Original: a little field with a players on the field
+--------------------
+Styled Modern: if you like a field who has a big field to do
 --------------------
 
 
@@ -109,7 +124,9 @@ Styled: a little field with a players on the field
 --------------------
 Normal: a food tray with food and a plastic container
 --------------------
-Styled: if i had a queen a cup of mine and bound to my good friend
+Styled Original: if i had a queen a cup of mine and bound to my good friend
+--------------------
+Styled Modern: i am sick in a big one of the island just as you say that is a little hope
 --------------------
 
 
@@ -120,7 +137,9 @@ Styled: if i had a queen a cup of mine and bound to my good friend
 --------------------
 Normal: a bathroom sink with a toilet and sink
 --------------------
-Styled: and in this habit to give my book
+Styled Original: and in this habit to give my book
+--------------------
+Styled Modern: i will take my sink and i will be a virgin if you have just the blood of this world
 --------------------
 
 
@@ -131,7 +150,9 @@ Styled: and in this habit to give my book
 --------------------
 Normal: a group of people sitting on a skateboard
 --------------------
-Styled: a group of people sitting on a couch with fear
+Styled Original: a group of people sitting on a couch with fear
+--------------------
+Styled Modern: a group of people sitting on a table with fear it
 --------------------
 
 
@@ -142,7 +163,9 @@ Styled: a group of people sitting on a couch with fear
 --------------------
 Normal: several people sitting at a bus stop
 --------------------
-Styled: some people say that some are sitting at a table and some plates of all
+Styled Original: some people say that some are sitting at a table and some plates of all
+--------------------
+Styled Modern: some people do not laugh at a public court
 --------------------
 
 
@@ -153,7 +176,9 @@ Styled: some people say that some are sitting at a table and some plates of all
 --------------------
 Normal: a glass of wine with a glass of wine glasses
 --------------------
-Styled: i have drunk but one cup tonight and that was craftily qualified too and behold what innovation it makes much
+Styled Original: i have drunk but one cup tonight and that was craftily qualified too and behold what innovation it makes much
+--------------------
+Styled Modern: i have already had a glass of wine tonight watered down but on the bottom of the earth
 --------------------
 
 
@@ -164,7 +189,9 @@ Styled: i have drunk but one cup tonight and that was craftily qualified too and
 --------------------
 Normal: a polar bear standing on a rock near a rock formation
 --------------------
-Styled: and now my lord teach a prayer on my horse in a black and white bear
+Styled Original: and now my lord teach a prayer on my horse in a black and white bear
+--------------------
+Styled Modern: now bear my arm and her back again
 --------------------
 
 
@@ -175,7 +202,9 @@ Styled: and now my lord teach a prayer on my horse in a black and white bear
 --------------------
 Normal: a woman in a kitchen preparing to serve
 --------------------
-Styled: dost thou a woman in the kitchen
+Styled Original: dost thou a woman in the kitchen
+--------------------
+Styled Modern: i am a woman in the back of a woman who made women in the earth
 --------------------
 
 
@@ -186,7 +215,9 @@ Styled: dost thou a woman in the kitchen
 --------------------
 Normal: a group of people sitting on a park bench
 --------------------
-Styled: but i pray you have a continent forbearance till the people that is sitting on a park
+Styled Original: but i pray you have a continent forbearance till the people that is sitting on a park
+--------------------
+Styled Modern: but i have a legitimate fool to the park and i will go in that case you are as with my head and with the duke of you
 --------------------
 
 
@@ -197,7 +228,9 @@ Styled: but i pray you have a continent forbearance till the people that is sitt
 --------------------
 Normal: a woman arranging a kitchen
 --------------------
-Styled: i am a woman in the kitchen with a woman and you may deliver it
+Styled Original: i am a woman in the kitchen with a woman and you may deliver it
+--------------------
+Styled Modern: i am a woman in the kitchen made you five women
 --------------------
 
 
@@ -208,7 +241,9 @@ Styled: i am a woman in the kitchen with a woman and you may deliver it
 --------------------
 Normal: a baseball player in mid swing
 --------------------
-Styled: a little field with a players on the field
+Styled Original: a little field with a players on the field
+--------------------
+Styled Modern: if you like a field who has a big field to do
 --------------------
 
 
@@ -219,8 +254,12 @@ Styled: a little field with a players on the field
 --------------------
 Normal: a traffic light with a building
 --------------------
-Styled: i will prove a bright orange and with a clock in the country there
+Styled Original: i will prove a bright orange and with a clock in the country there
 --------------------
+Styled Modern: i will give you a big one of my wits that is a pretty young man in the new gloss of your people
+--------------------
+
+
 
 
 

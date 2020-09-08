@@ -1,12 +1,16 @@
 # Experiment 21 epochs 15,29
 
+Evaluating (PosixPath('runs/exp_021/model_ep015.pth'), PosixPath('runs/exp_021/language_ep029.pth'))
+
+Evaluating images from mini_val
+
 ![Sample image](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000042.jpg)
 --------------------
 ['bear_NOUN']
 --------------------
 Normal: a big version of teddy bear
 --------------------
-Styled: a big version of a polar bear
+Styled: and in this habit to the world i will be a married and my brother
 --------------------
 
 
@@ -17,7 +21,7 @@ Styled: a big version of a polar bear
 --------------------
 Normal: a big bed with a stuffed animal laying on a pillow
 --------------------
-Styled: a big bed with a stuffed animal and a pillow
+Styled: he has a horse and my gracious lord
 --------------------
 
 
@@ -28,7 +32,7 @@ Styled: a big bed with a stuffed animal and a pillow
 --------------------
 Normal: a dog sitting on a sidewalk next to a tall building
 --------------------
-Styled: a dog sitting on a sidewalk next to a tall building
+Styled: i will do a dog and a few persons
 --------------------
 
 
@@ -39,7 +43,7 @@ Styled: a dog sitting on a sidewalk next to a tall building
 --------------------
 Normal: a room with a couch and a bright blue color scheme
 --------------------
-Styled: a room with a bright blue color scheme
+Styled: i have a fat oxen and bound to put on
 --------------------
 
 
@@ -61,7 +65,7 @@ Styled:
 --------------------
 Normal: a living room with a couch and a television
 --------------------
-Styled: a living room with a couch and a television
+Styled: i will have a little ere i can do with a good thing i will be a villain
 --------------------
 
 
@@ -72,7 +76,7 @@ Styled: a living room with a couch and a television
 --------------------
 Normal: a bird sitting on a tree branch
 --------------------
-Styled: a bird sitting on a tree branch
+Styled: thou didst usurp the night owl in a forest and bid the tree
 --------------------
 
 
@@ -83,7 +87,7 @@ Styled: a bird sitting on a tree branch
 --------------------
 Normal: a room with a sink and a piano
 --------------------
-Styled: a room with a sink and a piano
+Styled: i will have a queen and a very big in my blood to a little and buy my head
 --------------------
 
 
@@ -94,7 +98,7 @@ Styled: a room with a sink and a piano
 --------------------
 Normal: a baseball player in mid swing
 --------------------
-Styled: a baseball player in mid swing
+Styled: a little field with a players on the field
 --------------------
 
 
@@ -105,7 +109,7 @@ Styled: a baseball player in mid swing
 --------------------
 Normal: a food tray with food and a plastic container
 --------------------
-Styled: a food tray with a plastic fork and other patrons
+Styled: if i had a queen a cup of mine and bound to my good friend
 --------------------
 
 
@@ -116,7 +120,7 @@ Styled: a food tray with a plastic fork and other patrons
 --------------------
 Normal: a bathroom sink with a toilet and sink
 --------------------
-Styled: a bathroom sink with a toilet and sink
+Styled: and in this habit to give my book
 --------------------
 
 
@@ -127,7 +131,7 @@ Styled: a bathroom sink with a toilet and sink
 --------------------
 Normal: a group of people sitting on a skateboard
 --------------------
-Styled: a group of people sitting on a skateboard
+Styled: a group of people sitting on a couch with fear
 --------------------
 
 
@@ -138,7 +142,7 @@ Styled: a group of people sitting on a skateboard
 --------------------
 Normal: several people sitting at a bus stop
 --------------------
-Styled: several people sitting at a bus stop
+Styled: some people say that some are sitting at a table and some plates of all
 --------------------
 
 
@@ -149,7 +153,7 @@ Styled: several people sitting at a bus stop
 --------------------
 Normal: a glass of wine with a glass of wine glasses
 --------------------
-Styled: a glass of wine with a glass of wine
+Styled: i have drunk but one cup tonight and that was craftily qualified too and behold what innovation it makes much
 --------------------
 
 
@@ -160,7 +164,7 @@ Styled: a glass of wine with a glass of wine
 --------------------
 Normal: a polar bear standing on a rock near a rock formation
 --------------------
-Styled: a polar bear standing on a rock surrounded by tall rocks
+Styled: and now my lord teach a prayer on my horse in a black and white bear
 --------------------
 
 
@@ -171,7 +175,7 @@ Styled: a polar bear standing on a rock surrounded by tall rocks
 --------------------
 Normal: a woman in a kitchen preparing to serve
 --------------------
-Styled: a woman in a kitchen preparing to serve
+Styled: dost thou a woman in the kitchen
 --------------------
 
 
@@ -182,7 +186,7 @@ Styled: a woman in a kitchen preparing to serve
 --------------------
 Normal: a group of people sitting on a park bench
 --------------------
-Styled: a group of people sitting on a park bench
+Styled: but i pray you have a continent forbearance till the people that is sitting on a park
 --------------------
 
 
@@ -193,7 +197,7 @@ Styled: a group of people sitting on a park bench
 --------------------
 Normal: a woman arranging a kitchen
 --------------------
-Styled: a woman in a kitchen with a white shirt and a white sink
+Styled: i am a woman in the kitchen with a woman and you may deliver it
 --------------------
 
 
@@ -204,7 +208,7 @@ Styled: a woman in a kitchen with a white shirt and a white sink
 --------------------
 Normal: a baseball player in mid swing
 --------------------
-Styled: a baseball player in mid swing
+Styled: a little field with a players on the field
 --------------------
 
 
@@ -215,7 +219,7 @@ Styled: a baseball player in mid swing
 --------------------
 Normal: a traffic light with a building
 --------------------
-Styled: a traffic light with a building
+Styled: i will prove a bright orange and with a clock in the country there
 --------------------
 
 

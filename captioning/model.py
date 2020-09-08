@@ -333,7 +333,7 @@ class SemStyle(nn.Module):
         if not terms:
             return (terms, [], [])
         if style:
-            terms = terms + ["<style>"]
+            terms = terms + ["<shake_orig>"]
         orig_terms = list(terms)
         terms = self.tmap.prepare_for_training(terms, max_caption_len=20, terms=True)
         terms = torch.LongTensor(terms).unsqueeze(0)

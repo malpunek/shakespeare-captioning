@@ -76,6 +76,17 @@ shakespare_conf = {
     "frames": new_format_path / "shake_frames.json",
 }
 
+tolkien_fldr = Path("/data/tolkien")
+
+tolkien_conf = {
+    "name": "Tolkien",
+    "basic": tolkien_fldr / "tolkien_basic.json",
+    "txt": tolkien_fldr / "tolkien.txt",
+    "conll": tolkien_fldr / "tolkien.conll",
+    "final": tolkien_fldr / "tolkien_final.json",
+    "frames": tolkien_fldr / "tolkien_frames.json",
+}
+
 
 plays_path = "/data/shake/merged"
 nltk_data_path = "/home/malpunek/.nltk_data"

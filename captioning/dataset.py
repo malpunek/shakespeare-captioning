@@ -167,7 +167,7 @@ class BalancedLanguageDataset(LanguageDataset):
         return 3 * len(self.coco)
 
 
-class TolkienDataset(SemStyleDataset):
+class TolkienDataset(EncodingDataset):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

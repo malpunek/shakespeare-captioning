@@ -76,7 +76,7 @@ shakespare_conf = {
     "frames": new_format_path / "shake_frames.json",
 }
 
-tolkien_fldr = Path("/data/tolkien")
+tolkien_fldr = Path("/home/smorawski/data/tolkien")
 
 tolkien_conf = {
     "name": "Tolkien",

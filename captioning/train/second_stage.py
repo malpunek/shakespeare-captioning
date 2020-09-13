@@ -8,13 +8,11 @@ from tqdm import tqdm
 from ..config import (
     device,
     experiment_folder,
-    coco_train_conf,
-    shakespare_conf,
     second_stage,
+    second_stage_dataset,
 )
-from ..dataset import BalancedLanguageDataset
 from ..model import LanguageGenerator, SentenceDecoderWithAttention, TermEncoder
-from .misc import filter_short, extract_caption_len
+from .misc import extract_caption_len
 
 # In case of "RuntimeError: received 0 items of ancdata"
 # https://github.com/pytorch/pytorch/issues/973
@@ -56,12 +54,7 @@ def train(model, dataset, mapping, criterion, optimizer, writer, epoch):
 
 
 def main():
-    dataset = BalancedLanguageDataset(
-        coco_train_conf["final"],
-        shakespare_conf["final"],
-        encode=True,
-        filter_fn=filter_short,
-    )
+    dataset = second_stage_dataset()
 
     writer = SummaryWriter(experiment_folder)
 

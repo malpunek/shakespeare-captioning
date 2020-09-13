@@ -69,11 +69,26 @@ class SemStyleDataset(Dataset):
         ]
 
 
-class LanguageDataset(SemStyleDataset):
+class EncodingDataset(SemStyleDataset):
     def __init__(self, *args, encode=True, **kwargs):
         super().__init__(*args, **kwargs)
         self.encode = encode
 
+    def calculate_encoded(self):
+        raise NotImplementedError
+
+    @property
+    def encode(self):
+        return self._encode
+
+    @encode.setter
+    def encode(self, value):
+        self._encode = value
+        if value and not hasattr(self, "coco_caps_enc"):
+            self.calculate_encoded()
+
+
+class LanguageDataset(EncodingDataset):
     def calculate_encoded(self):
         # Captions
         self.coco_caps_enc = self._encode_caps(
@@ -97,16 +112,6 @@ class LanguageDataset(SemStyleDataset):
         self.shake_orig_terms_enc = self._encode_terms(
             self.shake, self.get_term_mapping, "<shake_orig>", max_len=20
         )
-
-    @property
-    def encode(self):
-        return self._encode
-
-    @encode.setter
-    def encode(self, value):
-        self._encode = value
-        if value and not hasattr(self, "coco_caps_enc"):
-            self.calculate_encoded()
 
     def get_coco(self, idx):
         if self.encode:
@@ -160,6 +165,69 @@ class BalancedLanguageDataset(LanguageDataset):
 
     def __len__(self):
         return 3 * len(self.coco)
+
+
+class TolkienDataset(SemStyleDataset):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def calculate_encoded(self):
+        # Captions
+        self.coco_caps_enc = self._encode_caps(
+            self.coco, self.get_cap_mapping, "caption_words"
+        )
+        self.tolkien_enc = self._encode_caps(
+            self.shake, self.get_cap_mapping, "caption_words"
+        )
+
+        # Terms:
+        self.coco_terms_enc = self._encode_terms(
+            self.coco, self.get_term_mapping, None, max_len=20
+        )
+
+        self.tolkien_terms_enc = self._encode_terms(
+            self.shake, self.get_term_mapping, "<shake_modern>", max_len=20
+        )
+
+    def __getitem__(self, idx):
+        if isinstance(idx, slice):
+            return [
+                self(i)
+                for i in range(idx.start or 0, idx.stop or sys.maxsize, idx.step or 1)
+            ]
+
+        if idx < len(self.coco):
+            return self.get_coco(idx)
+
+        return self.get_tolkien(idx - len(self.coco))
+
+    def get_coco(self, idx):
+        if self.encode:
+            return self.coco_caps_enc[idx], self.coco_terms_enc[idx]
+        item = self.coco[idx]
+        return item["caption_words"], item["terms"]
+
+    def get_tolkien(self, idx):
+        if self.encode:
+            return self.tolkien_enc[idx], self.tolkien_terms_enc[idx]
+        item = self.shake[idx]
+        return item["caption_words"], item["terms"]
+
+    def __len__(self):
+        return len(self.coco) + len(self.shake)
+
+
+class BalancedTolkienDataset(TolkienDataset):
+    def __getitem__(self, idx):
+        if idx < len(self.coco):
+            return super().__getitem__(idx)
+        idx -= len(self.coco)
+        if idx < len(self.coco):
+            return self.get_tolkien(idx % len(self.shake))
+        raise IndexError
+
+    def __len__(self):
+        return 2 * len(self.coco)
 
 
 class FeatureMixin:

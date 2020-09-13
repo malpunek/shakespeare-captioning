@@ -210,10 +210,31 @@ def first_stage_dataset():
     args = [
         coco_train_conf["features"],
         coco_train_conf["final"],
-        shakespare_conf["final"],
+        # shakespare_conf["final"],
+        tolkien_conf["final"],
     ]
     # QuickCocoDataset(*args, filter_fn=filter_short,)
     return AllTermsDataset(*args)
+
+
+@lazy
+def second_stage_dataset():
+    from .dataset import BalancedLanguageDataset, BalancedTolkienDataset  # noqa
+    from .train.misc import filter_short
+
+    return BalancedTolkienDataset(
+        coco_train_conf["final"],
+        tolkien_conf["final"],
+        encode=True,
+        filter_fn=filter_short,
+    )
+
+    # return BalancedLanguageDataset(
+    #     coco_train_conf["final"],
+    #     shakespare_conf["final"],
+    #     encode=True,
+    #     filter_fn=filter_short,
+    # )
 
 
 # ##### UTILS #####

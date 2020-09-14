@@ -205,7 +205,8 @@ def load_wn_nlp(model="en_core_web_lg"):
 @lazy
 def first_stage_dataset():
     # TODO some other way of switching to QuickCoco
-    from .dataset import AllTermsDataset  # , QuickCocoDataset
+    from .dataset import AllTermsDataset, QuickCocoDataset
+    from .train.misc import filter_short
 
     args = [
         coco_train_conf["features"],
@@ -213,8 +214,8 @@ def first_stage_dataset():
         # shakespare_conf["final"],
         tolkien_conf["final"],
     ]
-    # QuickCocoDataset(*args, filter_fn=filter_short,)
-    return AllTermsDataset(*args)
+    return QuickCocoDataset(*args, filter_fn=filter_short)
+    # return AllTermsDataset(*args)
 
 
 @lazy

@@ -3,15 +3,7 @@ from pathlib import Path
 import torch
 from PIL import Image
 
-from ..config import (
-    coco_train_conf,
-    device,
-    image_transform,
-    last_checkpoint_path,
-    shakespare_conf,
-)
-from ..dataset import SemStyleDataset
-from ..train.misc import filter_short
+from ..config import device, first_stage_dataset, image_transform, last_checkpoint_path
 from ..model import ImgToTermNet, TermDecoder
 
 
@@ -29,9 +21,7 @@ def run_path(model, mapping, img_path):
 
 def main():
 
-    mapping = SemStyleDataset(
-        coco_train_conf["final"], shakespare_conf["final"], filter_fn=filter_short
-    ).get_term_mapping
+    mapping = first_stage_dataset().get_term_mapping
     vocab_size = len(mapping)
 
     dec = TermDecoder(vocab_size, 2048, 2048)

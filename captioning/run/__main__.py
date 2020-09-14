@@ -4,12 +4,11 @@ import torch
 from tqdm.auto import tqdm
 
 from ..config import (
-    coco_train_conf,
     device,
+    first_stage_dataset,
     last_checkpoint_path,
-    shakespare_conf,
+    second_stage_dataset,
 )
-from ..dataset import BalancedLanguageDataset
 from ..model import (
     ImgToTermNet,
     LanguageGenerator,
@@ -18,27 +17,16 @@ from ..model import (
     TermDecoder,
     TermEncoder,
 )
-from ..train.second_stage import filter_short
 from .first_stage import get_image
 
 
 def get_mappings():
     # TODO get rid of redundant mapping
-    dataset = BalancedLanguageDataset(
-        coco_train_conf["final"],
-        shakespare_conf["final"],
-        encode=False,
-        # filter_fn=filter_fn,
-    )
+    dataset = first_stage_dataset()
 
     tmap = dataset.get_term_mapping
 
-    dataset = BalancedLanguageDataset(
-        coco_train_conf["final"],
-        shakespare_conf["final"],
-        encode=False,
-        filter_fn=filter_short,
-    )
+    dataset = second_stage_dataset()
     tmap2, cmapping = dataset.get_term_mapping, dataset.get_cap_mapping
 
     return cmapping, tmap, tmap2

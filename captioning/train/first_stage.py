@@ -140,7 +140,7 @@ def evaluate(model, mapping):
         prediction, confidence = model.forward_eval(feats.to(device), mapping)
         prediction = prediction[1:-1]  # strip <start> and <end>
 
-        score.bleu += sentence_bleu(targets, prediction) / eval_size
+        score.bleu += sentence_bleu(targets, prediction, (1,)) / eval_size
 
         p = list(precision(t, prediction) for t in targets)
         r = list(recall(t, prediction) for t in targets)

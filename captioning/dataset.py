@@ -277,6 +277,8 @@ class QuickCocoDataset(SemStyleDataset, FeatureMixin):
 
 
 class ValidationDataset(Dataset, FeatureMixin):
+    ann_key = "terms"
+
     def __init__(self, features_path, coco_val_final):
         self.open_feats(features_path)
 
@@ -289,7 +291,7 @@ class ValidationDataset(Dataset, FeatureMixin):
             key = ann["img_id"]
             if key not in feat_targets:
                 feat_targets[key] = list()
-            feat_targets[key].append(ann["terms"])
+            feat_targets[key].append(ann[self.ann_key])
 
         self.feat_targets = feat_targets
 
@@ -299,6 +301,10 @@ class ValidationDataset(Dataset, FeatureMixin):
     def __getitem__(self, idx):
         feat_id = self.feat_ids[idx]
         return self.features[idx], self.feat_targets[feat_id]
+
+
+class EvaluationDataset(ValidationDataset):
+    ann_key = "caption"
 
 
 class AllTermsDataset(SemStyleDataset, FeatureMixin):

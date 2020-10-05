@@ -1,3 +1,13 @@
+"""
+A module to extract raw text from tolkien books in epub format. Assumes a lot of things.
+I used it for books with following md5sums:
+
+5d513bf5255f055636203d0d50560be7 hobbit.epub
+8e3fe0113aa5e632907c397d535c3694 hurin.epub
+82cdaf6ed62b2a2f3de870a044a19c37 lotr.epub
+
+Inspect and adjust to your own versions of the texts
+"""
 from pathlib import Path
 from xml.etree import ElementTree as ET
 import json

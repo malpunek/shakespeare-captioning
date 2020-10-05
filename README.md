@@ -12,7 +12,17 @@ The network should be able to generate a caption along the lines of:
 
 <!-- # TODO Running -->
 
-<!-- # TODO Results -->
+# Results
+
+<!-- TODO  -->
+**More results coming soon!**
+
+![Birds on a tree](https://students.mimuw.edu.pl/~sm371229/mini_val/COCO_val2014_000000000143.jpg)
+
+*Classic*: A bird sitting on a tree branch
+
+*Shakespearian*: Thou didst usurp the night owl in a forest and bid the tree
+
 
 # References
 

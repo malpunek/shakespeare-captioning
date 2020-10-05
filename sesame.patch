@@ -1,0 +1,84 @@
+diff --git a/sesame/conll09.py b/sesame/conll09.py
+index 7003070..bb7507e 100644
+--- a/sesame/conll09.py
++++ b/sesame/conll09.py
+@@ -90,8 +90,9 @@ class CoNLL09Element:
+ class CoNLL09Example(FrameSemParse):
+     """a single example in CoNLL 09 format which corresponds to a single frame-semantic parse structure"""
+ 
+-    def __init__(self, sentence, elements):
++    def __init__(self, sentence, elements, text=None):
+         FrameSemParse.__init__(self, sentence)
++        self.stas_text = text
+         # not in parent class
+         self._elements = elements
+         self.sent_num = elements[0].sent_num
+@@ -157,7 +158,6 @@ class CoNLL09Example(FrameSemParse):
+ 
+             for e, role in zip(self._elements, rolelabels):
+                 mystr += e.get_str(rolelabel=role)
+-
+         return mystr
+ 
+     def get_predicted_frame_conll(self, predicted_frame):
+@@ -178,6 +178,8 @@ class CoNLL09Example(FrameSemParse):
+                 field.lupos = LUPOSDICT.getid(EMPTY_LABEL)
+                 field.frame = FRAMEDICT.getid(EMPTY_LABEL)
+             new_conll_str += field.get_str()
++        if self.stas_text is not None:
++            new_conll_str = self.stas_text.lstrip().rstrip() + "\n" + new_conll_str
+         return new_conll_str
+ 
+     def get_predicted_target_conll(self, predicted_target, predicted_lu):
+@@ -197,6 +199,8 @@ class CoNLL09Example(FrameSemParse):
+                 field.lupos = LUPOSDICT.getid(EMPTY_LABEL)
+             field.frame = FRAMEDICT.getid(EMPTY_LABEL)
+             new_conll_str += field.get_str(no_args=True)
++        if self.stas_text is not None:
++            new_conll_str = self.stas_text.lstrip().rstrip() + "\n" + new_conll_str
+         return new_conll_str
+ 
+     def print_internal(self, logger):
+diff --git a/sesame/dataio.py b/sesame/dataio.py
+index cc70cd5..5c417f8 100644
+--- a/sesame/dataio.py
++++ b/sesame/dataio.py
+@@ -25,6 +25,7 @@ def read_conll(conll_file, syn_type=None):
+ 
+     examples = []
+     elements = []
++    stas_text = ""
+     missingargs = 0.0
+     totalexamples = 0.0
+ 
+@@ -40,7 +41,7 @@ def read_conll(conll_file, syn_type=None):
+                         sentence.get_all_parts_of_ctree(cparses[next], CLABELDICT, True)
+                     next_ex += 1
+                     snum = elements[0].sent_num
+-                e = CoNLL09Example(sentence, elements)
++                e = CoNLL09Example(sentence, elements, stas_text)
+                 examples.append(e)
+                 if read_depsyn:
+                     sentence.get_all_paths_to(sorted(e.targetframedict.keys())[0])
+@@ -54,6 +55,9 @@ def read_conll(conll_file, syn_type=None):
+ 
+                 elements = []
+                 continue
++            elif not l[0].isdigit():
++                stas_text = l
++                continue
+             elements.append(CoNLL09Element(l, read_depsyn))
+         cf.close()
+     sys.stderr.write("# examples in %s : %d in %d sents\n" %(conll_file, len(examples), next_ex))
+diff --git a/sesame/raw_data.py b/sesame/raw_data.py
+index 47deefc..e82ab51 100644
+--- a/sesame/raw_data.py
++++ b/sesame/raw_data.py
+@@ -22,6 +22,6 @@ def make_data_instance(text, index):
+     elements = [CoNLL09Element(conll_line) for conll_line in conll_lines]
+ 
+     sentence = Sentence(syn_type=None, elements=elements)
+-    instance = CoNLL09Example(sentence, elements)
++    instance = CoNLL09Example(sentence, elements, text)
+ 
+     return instance

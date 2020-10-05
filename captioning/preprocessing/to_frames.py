@@ -68,12 +68,6 @@ def make_shake_basic(out_path):
         )
 
 
-# %% [markdown]
-# ## To TXT
-
-# %%
-
-
 def to_txt(file_in, file_out):
 
     if not ask_overwrite(file_out):
@@ -91,10 +85,6 @@ def to_txt(file_in, file_out):
                 f.write(txt_cap + "\n")
 
 
-# %% [markdown]
-# # RUN OPENSESAME ON TRAIN.TXT AND SHAKE.TXT
-
-# %%
 def split_on_empty(some_list):
     res = []
     for element in some_list:
@@ -107,7 +97,7 @@ def split_on_empty(some_list):
         yield res
 
 
-VERB_POS = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD"]  # TODO check MD == modal
+VERB_POS = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ", "MD"]
 NOUN_POS = ["NN", "NNS", "NNP", "NNPS"]
 
 
@@ -142,7 +132,7 @@ def match(file_conll, file_in, file_out):
         captions = json.load(f)
 
     lines = map(str.strip, lines)
-    frames = list(split_on_empty(lines))  # [f1, f1, f1, f2, f5, f5]
+    frames = list(split_on_empty(lines))  # [f1, f1, f1, f2, f5, f5...]
     groups = groupby(frames, key=itemgetter(0))
 
     sent_to_terms = {

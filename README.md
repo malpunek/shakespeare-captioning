@@ -1,5 +1,7 @@
 # Unsupervised Shakespeare Style Captioning
 
+**Note** A presentation can be seen [here](https://docs.google.com/presentation/d/1EahcNCGaTzwCNW02L2goWGBtrIvCVYqQpXel8fPd4bg/edit?usp=sharing). I will publish an accompanying video soon.
+
 Following a rapid development in state-of-the-art image capitoning models the goal of this master thesis is to train a neural network inspired by [SemStyle paper](https://arxiv.org/abs/1805.07030) to achieve image captioning in Shakespearian style. For instance given an image:
 
 [![Tommy Wiseau](https://bi.im-g.pl/im/16/27/10/z16936982V,kadr-z-filmu--The-room----na-nim-Tommy-Wiseau--pom.jpg)](https://wyborcza.pl/7,101707,22959130,tommy-wiseau-to-tomasz-wieczorkiewicz-najgorszy-rezyser-swiata.html)
@@ -8,9 +10,9 @@ The network should be able to generate a caption along the lines of:
 
 > A fearless hero facing down a horde of his most terrifying enemies with his beloved football
 
-<!-- # Running -->
+<!-- # TODO Running -->
 
-<!-- # Results -->
+<!-- # TODO Results -->
 
 # References
 

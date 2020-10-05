@@ -157,14 +157,6 @@ def get_zipped_plays_paths():
 
 
 @lazy
-def load_wn():
-    setup_nltk()
-    from nltk.corpus import wordnet
-
-    return wordnet
-
-
-@lazy
 def load_framenet():
     setup_nltk()
     from nltk.corpus import framenet
@@ -172,40 +164,11 @@ def load_framenet():
     return framenet
 
 
-@lru_cache(maxsize=8)
-def load_nlp(model="en_core_web_lg"):
-    import spacy
-
-    logger.info(f"Loading spacy model {model}..")
-
-    def worker():
-        try:
-            return spacy.load(model)
-        except OSError:
-            logger.info("Model not found. Downloading...")
-            spacy.cli.download(model)
-            logger.info("Spacy model downloaded!")
-            return spacy.load(model)
-
-    nlp = worker()
-    logger.info(f"Spacy model {model} loaded!")
-    return nlp
-
-
-@lru_cache(maxsize=8)
-def load_wn_nlp(model="en_core_web_lg"):
-    from spacy_wordnet.wordnet_annotator import WordnetAnnotator
-
-    nlp = load_nlp(model)
-    nlp.add_pipe(WordnetAnnotator(nlp.lang), after="tagger")
-    return nlp
-
-
 # ##### TRAINING #####
 @lazy
 def first_stage_dataset():
     # TODO some other way of switching to QuickCoco
-    from .dataset import AllTermsDataset, QuickCocoDataset
+    from .dataset import AllTermsDataset, QuickCocoDataset  # noqa
     from .train.misc import filter_short
 
     args = [

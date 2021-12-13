@@ -23,7 +23,7 @@ iniconfig==1.0.1
 jmespath==0.10.0
 joblib==0.17.0
 kiwisolver==1.2.0
-lxml==4.5.2
+lxml==4.6.5
 Markdown==3.2.2
 matplotlib==3.3.2
 multidict==4.7.6
